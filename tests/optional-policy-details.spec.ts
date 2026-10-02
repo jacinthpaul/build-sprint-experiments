@@ -1,4 +1,4 @@
-﻿import { test, expect } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 import { ConvexHttpClient } from 'convex/browser';
 import { api } from '../convex/_generated/api';
 import { readFileSync } from 'node:fs';
@@ -15,7 +15,7 @@ test('new policy saves optional details, hides cleared details and reopens with 
  await page.getByLabel('Insurer', { exact: true }).fill('LIC');
  await page.getByLabel('Policy number', { exact: true }).fill('DEMO-OPTIONAL-001');
  await page.getByLabel('Policy type', { exact: true }).selectOption('Life insurance');
- await page.getByLabel('Nominee', { exact: true }).fill('Demo Family Member');
+ await page.getByLabel('Nominee(s)', { exact: true }).fill('Demo Family Member');
  await page.getByLabel('Where the physical papers are kept').fill('Blue folder, bedroom cupboard, top shelf');
  await page.getByLabel('Servicing branch or agent name (optional)', { exact: true }).fill('Demo LIC branch, Bengaluru');
  await page.getByLabel('Branch or agent phone number (optional)', { exact: true }).fill('+91 00000 00000');

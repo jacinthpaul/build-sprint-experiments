@@ -1,17 +1,17 @@
-﻿import { test, expect } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 test('can preview, save and reopen one insurance policy', async ({ page, context, browser }) => {
  const errors: string[] = []; page.on('pageerror', e => errors.push(e.message));
  await page.goto('/');
  await page.getByLabel('Insurer', { exact: true }).fill('Demo Insurance');
  await page.getByLabel('Policy number', { exact: true }).fill('DEMO-001');
- await page.getByLabel('Nominee', { exact: true }).fill('Demo Family Member');
+ await page.getByLabel('Nominee(s)', { exact: true }).fill('Demo Family Member');
  await page.getByLabel('Where the physical papers are kept').fill('Blue folder, top shelf');
  const family = page.getByRole('region', { name: 'For my family' });
  await expect(family).toContainText('Demo Insurance'); await expect(family).toContainText('DEMO-001'); await expect(family).toContainText('Blue folder, top shelf'); await expect(family).toContainText('death certificate');
  await page.getByLabel('Policy type', { exact: true }).selectOption('Health insurance'); await expect(family).toContainText('hospital bills'); await expect(family).not.toContainText('death certificate');
  await page.getByLabel('Policy type', { exact: true }).selectOption('Life insurance');
  await page.getByRole('button', { name: 'Save policy', exact: true }).click(); await expect(page.getByRole('status')).toContainText('Policy saved.');
- await page.reload(); await expect(page.getByLabel('Policy number', { exact: true })).toHaveValue('DEMO-001'); await expect(page.getByLabel('Nominee', { exact: true })).toHaveValue('Demo Family Member');
+ await page.reload(); await expect(page.getByLabel('Policy number', { exact: true })).toHaveValue('DEMO-001'); await expect(page.getByLabel('Nominee(s)', { exact: true })).toHaveValue('Demo Family Member');
  await page.getByLabel('Policy number', { exact: true }).fill('DEMO-002'); await page.getByRole('button', { name: 'Save policy', exact: true }).click(); await expect(page.getByRole('status')).toContainText('Policy saved.'); await page.reload(); await expect(page.getByLabel('Policy number', { exact: true })).toHaveValue('DEMO-002');
  await page.screenshot({ path: 'verification/desktop.png', fullPage: true });
  await page.setViewportSize({ width: 390, height: 844 }); await page.screenshot({ path: 'verification/mobile.png', fullPage: true }); expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
