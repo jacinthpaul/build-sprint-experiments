@@ -14,7 +14,7 @@ export const save = mutation({ args: { browserKey: v.string(), ...fields }, retu
  keyCheck(args.browserKey);
  const data = { ...args, insurer: args.insurer.trim(), policyNumber: args.policyNumber.trim(), nominee: args.nominee.trim(), paperLocation: args.paperLocation.trim(), servicingName: args.servicingName?.trim() || undefined, servicingPhone: args.servicingPhone?.trim() || undefined, personalNote: args.personalNote?.trim() || undefined, sumAssured: args.sumAssured };
  for (const value of [data.insurer, data.policyNumber, data.nominee, data.paperLocation]) if (!value || value.length > 500) throw new Error("Fill in every required field using 500 characters or fewer.");
- for (const value of [data.servicingName, data.servicingPhone, data.personalNote]) if (value && value.length > 500) throw new Error("Optional text must be 500 characters or fewer.");
+ for (const value of [data.servicingName, data.servicingPhone, data.personalNote, data.firstAction, data.guideSource]) if (value && value.length > 500) throw new Error("Optional text must be 500 characters or fewer.");
  if (data.sumAssured !== undefined && (!Number.isFinite(data.sumAssured) || data.sumAssured <= 0 || data.sumAssured > 1e12 || Math.abs(data.sumAssured * 100 - Math.round(data.sumAssured * 100)) > 0.01)) throw new Error("Enter a positive rupee amount with up to two decimal places.");
  const row = await ctx.db.query("policies").withIndex("by_browser_key", q => q.eq("browserKey", args.browserKey)).unique();
  if (row) await ctx.db.patch(row._id, data); else await ctx.db.insert("policies", data);
