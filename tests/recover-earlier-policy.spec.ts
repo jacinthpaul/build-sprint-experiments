@@ -31,4 +31,12 @@ test('recovering an earlier policy preserves details and permanently retires its
   await expect(publicClient.mutation(api.policies.save, old)).rejects.toThrow(/moved into a Kosh account/);
   await page.reload();
   await expect(page.getByRole('article')).toContainText('DEMO-EARLIER-001');
+  await page.getByRole('button', {name:'Change policy details',exact:true}).click();
+  await expect(page.locator('form input, form select, form textarea')).toHaveCount(6);
+  await page.getByLabel('Where the hard or soft copy is kept', {exact:true}).fill('Moved demo folder');
+  await page.getByRole('button', {name:'Save changes',exact:true}).click();
+  await expect(page.getByRole('article')).toContainText('Moved demo folder');
+  await page.getByText('Earlier saved details', {exact:true}).click();
+  await expect(page.getByText('Recorded nominee: Demo Family', {exact:true})).toBeVisible();
+  await expect(page.getByText('Ask the claims branch.', {exact:true})).toBeVisible();
 });

@@ -4,6 +4,8 @@ import {useAuthActions} from '@convex-dev/auth/react';
 import {api} from '../convex/_generated/api';
 import type {Id} from '../convex/_generated/dataModel';
 import {Back,Loading,Notice,go,message} from './common';
+import {SharingChoices} from './sharing-choices';
+import {policyTitle} from './policy';
 export function AuthScreen({onReady,onBack,family=false,defaultCreate=false,busy=false}:{onReady:()=>void;onBack:()=>void;family?:boolean;defaultCreate?:boolean;busy?:boolean}){
  const {signIn}=useAuthActions();const {isAuthenticated,isLoading}=useConvexAuth();const [create,setCreate]=useState(defaultCreate);const [pending,setPending]=useState(false);const [error,setError]=useState('');
  useEffect(()=>{if(isAuthenticated&&!isLoading)onReady();},[isAuthenticated,isLoading]);
@@ -12,11 +14,35 @@ export function AuthScreen({onReady,onBack,family=false,defaultCreate=false,busy
  return <section className="auth-screen"><Back onClick={onBack}/><h1>{create?'Create your account':'Sign in to Kosh'}</h1><p>{family?'Use your own account to open information shared with you. You won’t need the policyholder’s phone.':'Keep your policies private and return to them on any device.'}</p><Notice error={error}/><form onSubmit={submit}><fieldset disabled={pending||busy}><label>Email address<input name="email" type="email" autoComplete="email" required maxLength={254}/></label><label>Password<input aria-label="Password" name="password" type="password" autoComplete={create?'new-password':'current-password'} required minLength={create?12:1} maxLength={128}/>{create&&<span className="hint">Use at least 12 characters. Keep it in your password manager; email password reset is not available yet.</span>}</label><button className="primary" type="submit">{pending?(create?'Creating your account…':'Signing you in…'):(create?'Create account':'Sign in')}</button></fieldset></form><button className="text-button" onClick={()=>{setCreate(!create);setError('');}}>{create?'Already have an account? Sign in':'New to Kosh? Create account'}</button></section>;
 }
 export function ShareScreen({id}:{id:Id<'insurancePolicies'>}){
- const p=useQuery(api.insurance.get,{id});const access=useQuery(api.insurance.access,{id});const give=useMutation(api.insurance.giveAccess);const remove=useMutation(api.insurance.removeAccess);
- const [busy,setBusy]=useState(false);const [error,setError]=useState('');const [status,setStatus]=useState('');const [confirm,setConfirm]=useState<Id<'familyAccess'>|null>(null);const [name,setName]=useState('');const [code,setCode]=useState('');
- async function submit(e:React.FormEvent){e.preventDefault();setBusy(true);setError('');setStatus('');try{await give({id,recipientCode:code,recipientName:name});setStatus(`${name.trim()} can now access this policy.`);setCode('');setName('');}catch(e){setError(message(e,'Access wasn’t created. Check the details and try again.'));}finally{setBusy(false);}}
- async function revoke(accessId:Id<'familyAccess'>,name:string){setBusy(true);setError('');try{await remove({id:accessId});setConfirm(null);setStatus(`Access removed for ${name}.`);}catch(e){setError(message(e,'Access wasn’t removed. Try again.'));}finally{setBusy(false);}}
- if(p===undefined||access===undefined)return <Loading>Loading sharing details…</Loading>;if(!p)return <><h1>This policy isn’t available.</h1><Back onClick={()=>go('policies')}>Back to policies</Back></>;
+ const p=useQuery(api.insurance.get,{id});const access=useQuery(api.insurance.access,{id});
+ const give=useMutation(api.insurance.giveAccess);const remove=useMutation(api.insurance.removeAccess);
+ const [busy,setBusy]=useState(false);const [error,setError]=useState('');const [status,setStatus]=useState('');
+ const [confirm,setConfirm]=useState<Id<'familyAccess'>|null>(null);const [name,setName]=useState('');const [code,setCode]=useState('');
+ async function submit(event:React.FormEvent){event.preventDefault();setBusy(true);setError('');setStatus('');try{await give({id,recipientCode:code,recipientName:name});setStatus(`${name.trim()} can now access this policy.`);setCode('');setName('');}catch(e){setError(message(e,'Access was not created. Check the details and try again.'));}finally{setBusy(false);}}
+ async function revoke(accessId:Id<'familyAccess'>,name:string){setBusy(true);setError('');try{await remove({id:accessId});setConfirm(null);setStatus(`Access removed for ${name}.`);}catch(e){setError(message(e,'Access was not removed. Try again.'));}finally{setBusy(false);}}
+ if(p===undefined||access===undefined)return <Loading>Loading sharing details…</Loading>;
+ if(!p)return <><h1>This policy isn’t available.</h1><Back onClick={()=>go('policies')}>Back to policies</Back></>;
  const link=location.origin+location.pathname+'#screen=guide&id='+id;
- return <><Back onClick={()=>go('policy',id)}>Back to policy</Back><h1>Share access</h1><p>{p.insurer} · {p.policyNumber}</p><p className="muted">Your recipient can view this policy and its claim guide. They cannot edit it. Sharing does not change the nominee.</p><Notice error={error} status={status}/><form onSubmit={submit}><fieldset disabled={busy||Boolean(confirm)}><label>Recipient name<input value={name} onChange={e=>setName(e.target.value)} required maxLength={200}/></label><label>Recipient’s family access code<input aria-label={"Recipient" + String.fromCharCode(8217) + "s family access code"} value={code} onChange={e=>setCode(e.target.value)} required maxLength={100}/><span className="hint">Ask them to create their own Kosh account, open “Information shared with me,” and send you the code shown there. Check it directly with them.</span></label><button className="primary" type="submit">{busy?'Setting up access…':'Give access'}</button></fieldset></form><section><h2>People with access</h2>{!access.length?<p>No one has access to this policy yet.</p>:<ul className="access-list">{access.map(a=><li key={a._id}><strong>{a.recipientName}</strong>{confirm===a._id?<div><p>Remove access for {a.recipientName}? Copies they already kept cannot be erased.</p><button className="primary" disabled={busy} onClick={()=>revoke(a._id,a.recipientName)}>{busy?'Removing access…':'Remove access'}</button><button className="text-button" disabled={busy} onClick={()=>setConfirm(null)}>Keep access</button></div>:<button className="text-button" disabled={busy} onClick={()=>setConfirm(a._id)}>Remove access for {a.recipientName}</button>}</li>)}</ul>}</section>{access.length>0&&<section><h2>Send the policy link</h2><p className="muted">Only accounts you granted access can open it. Send it yourself; Kosh does not send a message.</p><label>Policy link<input readOnly value={link} onFocus={e=>e.target.select()}/></label><button className="text-button" onClick={async()=>{try{await navigator.clipboard.writeText(link);setStatus('Policy link copied. Send it to your recipient.');}catch{setStatus('Copy the policy link from the field above.');}}}>Copy policy link</button></section>}</>;
+ return <>
+  <Back onClick={()=>go('policy',id)}>Back to policy</Back><h1>Share policy</h1>
+  <p>{policyTitle(p)} · {p.policyNumber}</p><p className="muted">Saved to your account.</p>
+  <Notice error={error} status={status}/>
+  {!confirm&&<SharingChoices policy={p} privateLink={access.length?link:undefined}>
+   <p className="muted">Your policy has a unique private link. Choose the family account that can open it. They can view the details; they cannot edit them.</p>
+   <form onSubmit={submit}><fieldset disabled={busy}>
+    <label>Recipient name<input aria-label="Recipient name" value={name} onChange={e=>setName(e.target.value)} required maxLength={200}/></label>
+    <label>Recipient’s family access code<input aria-label="Recipient’s family access code" value={code} onChange={e=>setCode(e.target.value)} required maxLength={100}/><span className="hint">Ask them to create their own Kosh account, open “Information shared with me,” and send you the code. Check it directly with them.</span></label>
+    <button className="primary" type="submit">{busy?'Setting up access…':'Give access'}</button>
+   </fieldset></form>
+   {access.length>0&&<section className="private-link"><h2>Your private policy link</h2><p className="muted">Only accounts you gave access to can open this link.</p>
+    <label>Policy link<input readOnly value={link} onFocus={e=>e.target.select()}/></label>
+    <button className="text-button" onClick={async()=>{try{await navigator.clipboard.writeText(link);setStatus('Policy link copied. Send it to your recipient.');}catch{setStatus('Copy the policy link from the field above.');}}}>Copy policy link</button>
+   </section>}
+  </SharingChoices>}
+  <section className="people-access"><h2>People with access</h2>
+   {!access.length?<p>No one has access to this policy yet.</p>:<ul className="access-list">{access.map(a=><li key={a._id}><strong>{a.recipientName}</strong>
+    {confirm===a._id?<div><p>Remove access for {a.recipientName}? Copies they already kept cannot be erased.</p><button className="primary" disabled={busy} onClick={()=>revoke(a._id,a.recipientName)}>{busy?'Removing access…':'Remove access'}</button><button className="text-button" disabled={busy} onClick={()=>setConfirm(null)}>Keep access</button></div>:<button className="text-button" disabled={busy} onClick={()=>setConfirm(a._id)}>Remove access for {a.recipientName}</button>}
+   </li>)}</ul>}
+  </section>
+ </>;
 }

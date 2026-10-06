@@ -1,20 +1,57 @@
-import React, {useEffect,useRef,useState} from 'react';
+﻿import React, {useEffect, useRef, useState} from 'react';
 import {useQuery} from 'convex/react';
 import {api} from '../convex/_generated/api';
 import type {Id} from '../convex/_generated/dataModel';
-import {blankGuide,blankPolicy,policyTypes,situations,validHttps,type Guide,type Policy} from './policy';
-import {Back,Loading,Notice,go} from './common';
-export function PolicyEditor({initial,id,onReview,onSave,onBack,onDraft,busy}:{initial:Policy;id?:Id<'insurancePolicies'>;onReview:(p:Policy)=>void;onSave:(p:Policy,id:Id<'insurancePolicies'>)=>Promise<void>;onBack:()=>void;onDraft:(p:Policy)=>void;busy:boolean}){
- const stored=useQuery(api.insurance.get,id?{id}:'skip');const [p,setP]=useState(initial);const [index,setIndex]=useState(0);const [error,setError]=useState('');const hydrated=useRef(false);
- useEffect(()=>{if(id&&stored&&!hydrated.current){const clean = blankPolicy(); for (const key of Object.keys(clean) as (keyof Policy)[]) (clean as unknown as Record<string, unknown>)[key] = stored[key]; setP(clean);hydrated.current=true;}},[id,stored]);
- useEffect(()=>{if(!id)onDraft(p);},[p,id,onDraft]);
- const g=p.guides[index]||p.guides[0];
- const change=(key:keyof Policy,value:string)=>setP(p=>({...p,[key]:value}));
- const changeGuide=(key:keyof Guide,value:unknown)=>setP(p=>({...p,guides:p.guides.map((g,i)=>i===index?{...g,[key]:value}:g)}));
- function field(label:string,key:keyof Policy,type='text',hint?:string,required=false){return <label key={key}>{label}<input aria-label={label} type={type} value={String(p[key])} required={required} step={type==="number"?"0.01":undefined} min={type==="number"?"0.01":undefined} maxLength={4000} onChange={e=>change(key,e.target.value)}/>{hint&&<span className="hint">{hint}</span>}</label>;}
- function area(label:string,key:keyof Policy){return <label>{label}<textarea aria-label={label} rows={3} maxLength={4000} value={String(p[key])} onChange={e=>change(key,e.target.value)}/></label>;}
- function gf(label:string,key:keyof Guide,type='text',hint?:string){return <label>{label}<input aria-label={label} type={type} value={String(g[key])} maxLength={4000} onChange={e=>changeGuide(key,e.target.value)}/>{hint&&<span className="hint">{hint}</span>}</label>;}
- async function submit(e:React.FormEvent){e.preventDefault();setError('');if(p.startDate&&p.endDate&&p.endDate<p.startDate){setError('The coverage end date must be after the start date.');return;}if(p.guides.some(g=>g.instructionsUrl&&!validHttps(g.instructionsUrl))){setError('Use a full https link for insurer instructions.');return;}const names=p.guides.map(g=>g.situation.trim().toLowerCase());if(names.some(n=>!n)||new Set(names).size!==names.length){setError('Give each claim situation a different name.');return;}if(id)await onSave(p,id);else onReview(p);}
- if(id&&stored===undefined)return <Loading>Loading your policy…</Loading>;if(id&&stored===null)return <><h1>This policy isn’t available.</h1><Back onClick={()=>go('policies')}>Back to policies</Back></>;
- return <><Back onClick={onBack}/><h1>{id?'Edit policy':'Add one policy'}</h1><p className="muted">Add what you know. You can complete missing details later.</p><Notice error={error}/><form onSubmit={submit}><fieldset disabled={busy}><section className="form-section"><h2>Policy details</h2><label>Insurance type<select aria-label="Insurance type" value={p.policyType} onChange={e=>{setIndex(0);setP(p=>({...p,policyType:e.target.value,guides:p.guides.length===1&&JSON.stringify(p.guides[0])===JSON.stringify(blankGuide(p.guides[0].situation))?[blankGuide(situations[e.target.value][0])]:p.guides}));}}>{policyTypes.map(t=><option key={t}>{t}</option>)}</select></label>{field('Insurer','insurer','text',undefined,true)}{field('Policy number','policyNumber','text','Copy it exactly as printed on your policy.',true)}{field('Policy owner','policyOwner','text','The person who owns the policy.')}{field('Who or what is covered','insured','text','People, vehicle, home, or other insured item. Keep this separate from the owner and nominee.')}{field('Coverage starts','startDate','date')}{field('Coverage ends','endDate','date','Leave blank if no end date is stated.')}{!['Motor insurance','Home insurance'].includes(p.policyType)&&field('Recorded nominee, if applicable','nominee','text','Sharing access does not change the recorded nominee.')}{field('Where the policy documents are kept','paperLocation','text','A folder, email location, or another place your family can find.')}{field('Coverage amount in rupees, if stated','sumAssured','number')}{area('What the policy covers','coverage')}{area('What the policy excludes','exclusions')}{field('Source for coverage and exclusions','coverageSource','text','Document title and page, or official insurer URL.')}{area('A note to my family','personalNote')}</section><section className="form-section"><h2>Claim guidance</h2><p className="muted">Copy instructions from your policy or insurer. Nothing here is automatically verified. Leave unknown details blank.</p><label>Claim situation<select aria-label="Claim situation" value={index} onChange={e=>setIndex(Number(e.target.value))}>{p.guides.map((g,i)=><option key={i} value={i}>{g.situation||'Unnamed situation'}</option>)}</select></label>{gf('Situation name','situation','text','For example: death, reimbursement, accident damage, or lost baggage.')}{p.guides.length<20&&<button type="button" className="text-button" onClick={()=>{const name=(situations[p.policyType]||['Other claim']).find(s=>!p.guides.some(g=>g.situation===s))||'New situation';setP(p=>({...p,guides:[...p.guides,blankGuide(name)]}));setIndex(p.guides.length);}}>Add another claim situation</button>}<label>First action for my family<textarea aria-label="First action for my family" rows={3} maxLength={4000} value={g.firstAction} onChange={e=>changeGuide('firstAction',e.target.value)}/></label>{gf('Source for claim instructions','source','text','Document title and page, or official insurer URL.')}{gf('Claim contact name','contactName')}{gf('Claim contact phone','contactPhone','tel')}{gf('Source for the claim contact','contactSource','text','Where you checked this number or link.')}{gf('Official insurer claim instructions link','instructionsUrl','url','Use an https link from the insurer.')}{gf('Stated claim deadlines','deadlines','text','Copy the wording; do not guess a deadline.')}<label>Remaining claim steps<textarea aria-label="Remaining claim steps" rows={4} maxLength={4000} value={g.steps} onChange={e=>changeGuide('steps',e.target.value)}/><span className="hint">One step per line, copied from the source.</span></label>{gf('Date I checked these sources','checkedOn','date')}<h3>Required documents</h3><p className="hint">Use the insurer’s checklist. Mark a document available only when your family can find it.</p>{g.documents.map((d,i)=><div className="document-edit" key={i}><label>Document {i+1}<input value={d.name} required maxLength={500} onChange={e=>changeGuide('documents',g.documents.map((d,j)=>j===i?{...d,name:e.target.value}:d))}/></label><label className="checkbox"><input type="checkbox" checked={d.available} onChange={e=>changeGuide('documents',g.documents.map((d,j)=>j===i?{...d,available:e.target.checked}:d))}/>Available to my family</label><button type="button" className="text-button" onClick={()=>changeGuide('documents',g.documents.filter((_,j)=>j!==i))}>Remove document {i+1}</button></div>)}{g.documents.length<40&&<button type="button" className="text-button" onClick={()=>changeGuide('documents',[...g.documents,{name:'',available:false}])}>Add required document</button>}</section><div className="action-row"><button className="primary" type="submit">{busy?'Saving your changes…':id?'Save changes':'Review policy'}</button><span className="muted">{id?'Changes are saved only when you choose Save changes.':'Your draft stays in this tab until you save it. No documents are uploaded.'}</span></div></fieldset></form></>;
+import {blankPolicy, policyTypes, savedContact, type Policy} from './policy';
+import {Back, Loading, Notice, go} from './common';
+
+export function PolicyEditor({initial, id, onReview, onSave, onBack, onDraft, busy}: {
+ initial: Policy; id?: Id<'insurancePolicies'>; onReview: (p:Policy)=>void;
+ onSave: (p:Policy, id:Id<'insurancePolicies'>)=>Promise<void>;
+ onBack: ()=>void; onDraft: (p:Policy)=>void; busy: boolean;
+}) {
+ const stored = useQuery(api.insurance.get, id ? {id} : 'skip');
+ const [p, setP] = useState(initial);
+ const [error, setError] = useState('');
+ const hydrated = useRef(false);
+ useEffect(() => {
+  if (id && stored && !hydrated.current) {
+   const clean = blankPolicy();
+   for (const key of Object.keys(clean) as (keyof Policy)[]) {
+    (clean as unknown as Record<string,unknown>)[key] = stored[key] ?? clean[key];
+   }
+   clean.claimContact = savedContact(stored);
+   setP(clean); hydrated.current = true;
+  }
+ }, [id, stored]);
+ useEffect(() => { if (!id) onDraft(p); }, [p, id, onDraft]);
+ const change = (key:keyof Policy, value:string) => setP(p=>({...p, [key]:value}));
+ async function submit(event:React.FormEvent) {
+  event.preventDefault(); setError('');
+  if (!p.policyNumber.trim()) { setError('Add the policy number before sharing.'); return; }
+  if (p.sumAssured && (!Number.isFinite(Number(p.sumAssured)) || Number(p.sumAssured)<=0 || Number(p.sumAssured)>1e12)) {
+   setError('Enter a positive coverage amount.'); return;
+  }
+  if (id) await onSave(p,id); else onReview(p);
+ }
+ if (id && stored===undefined) return <Loading>Loading your policy…</Loading>;
+ if (id && stored===null) return <><h1>This policy isn’t available.</h1><Back onClick={()=>go('policies')}>Back to policies</Back></>;
+ return <>
+  <Back onClick={onBack}/><h1>{id?'Edit policy':'Add one policy'}</h1>
+  <p className="muted">Keep the essentials together. Add what you know.</p>
+  <Notice error={error}/>
+  <form onSubmit={submit}><fieldset disabled={busy}>
+   <section className="form-section"><h2>Policy details</h2>
+    <label>Insurance type<select aria-label="Insurance type" value={p.policyType} onChange={e=>change('policyType',e.target.value)}>{policyTypes.map(type=><option key={type}>{type}</option>)}</select></label>
+    <label>Policy number<input aria-label="Policy number" value={p.policyNumber} required maxLength={4000} onChange={e=>change('policyNumber',e.target.value)}/></label>
+    <label>Coverage end date<input aria-label="Coverage end date" type="date" value={p.endDate} onChange={e=>change('endDate',e.target.value)}/></label>
+    <label>Where the hard or soft copy is kept<input aria-label="Where the hard or soft copy is kept" value={p.paperLocation} maxLength={4000} aria-describedby="document-location-hint" onChange={e=>change('paperLocation',e.target.value)}/><span className="hint" id="document-location-hint">For example: bedroom cupboard, Gmail, or a shared folder.</span></label>
+    <label>Coverage amount (₹)<input aria-label="Coverage amount (₹)" type="number" min="0.01" max="1000000000000" step="0.01" value={p.sumAssured} onChange={e=>change('sumAssured',e.target.value)}/></label>
+   </section>
+   <section className="form-section"><h2>Claim contact</h2>
+    <label>Agent number or customer care details<textarea aria-label="Agent number or customer care details" rows={2} maxLength={4000} value={p.claimContact || ''} onChange={e=>change('claimContact',e.target.value)}/></label>
+   </section>
+   <div className="action-row"><button className="primary" type="submit">{busy?'Saving…':id?'Save changes':'Share policy'}</button><span className="muted">{id?'Your other saved details will be kept.':'Choose a download, an email draft, or a private link next.'}</span></div>
+  </fieldset></form>
+ </>;
 }

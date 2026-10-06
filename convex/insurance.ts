@@ -52,7 +52,7 @@ export const save = mutation({ args: { id: v.optional(v.id("insurancePolicies"))
       (fields as Record<string, unknown>)[key] = value.trim();
     }
   }
-  if (!fields.insurer || !fields.policyNumber) throw new ConvexError("Add the insurer and policy number before saving.");
+  if (!fields.policyNumber) throw new ConvexError("Add the policy number before saving.");
   if ([fields.startDate, fields.endDate].some(date => date && !validDate(date))) throw new ConvexError("Check the coverage dates against your policy.");
   if (fields.startDate && fields.endDate && fields.endDate < fields.startDate) throw new ConvexError("The end date must be after the start date.");
   if (fields.sumAssured && (!Number.isFinite(Number(fields.sumAssured)) || Number(fields.sumAssured) <= 0 || Number(fields.sumAssured) > 1e12)) throw new ConvexError("Enter a positive coverage amount.");
@@ -71,7 +71,7 @@ export const save = mutation({ args: { id: v.optional(v.id("insurancePolicies"))
   if (id) await owned(ctx, id);
   const rows = await ctx.db.query("insurancePolicies").withIndex("by_owner", q => q.eq("ownerId", ownerId)).take(101);
   if (!id && rows.length >= 100) throw new ConvexError("You can keep up to 100 policies in this version.");
-  if (rows.some(p => p._id !== id && p.insurer.toLowerCase() === fields.insurer.toLowerCase() && p.policyNumber.toLowerCase() === fields.policyNumber.toLowerCase())) throw new ConvexError("This policy is already saved. Open it to update its details.");
+  if (rows.some(p => p._id !== id && p.policyType === fields.policyType && p.insurer.toLowerCase() === fields.insurer.toLowerCase() && p.policyNumber.toLowerCase() === fields.policyNumber.toLowerCase())) throw new ConvexError("This policy is already saved. Open it to update its details.");
   const data = { ...fields, ownerId, updatedAt: Date.now() };
   if (id) { await ctx.db.patch(id, data); return id; }
   return ctx.db.insert("insurancePolicies", data);
@@ -108,8 +108,10 @@ export const sharedList = query({ args: {}, returns: v.array(insuranceDoc), hand
 } });
 export const sharedGet = query({ args: { id: v.id("insurancePolicies") }, returns: v.union(v.null(), insuranceDoc), handler: async (ctx, { id }) => {
   const recipientId = await user(ctx);
+  const policy = await ctx.db.get(id);
+  if (policy?.ownerId === recipientId) return policy;
   const access = await ctx.db.query("familyAccess").withIndex("by_policy_recipient", q => q.eq("policyId", id).eq("recipientId", recipientId)).unique();
-  return access ? ctx.db.get(id) : null;
+  return access ? policy : null;
 } });
 export const importLegacy = mutation({ args: { browserKey: v.string() }, returns: v.union(v.null(), v.id("insurancePolicies")), handler: async (ctx, { browserKey }) => {
   const ownerId = await user(ctx);

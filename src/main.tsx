@@ -9,6 +9,7 @@ import {Back,Loading,Notice,go,message,readRoute,type Route} from './common';
 import {PolicyEditor} from './policy-editor';
 import {FamilyGuide,FamilyList,LegacyFamily,PolicyList,PolicyView,SavedPolicy} from './policy-views';
 import {AuthScreen,ShareScreen} from './access';
+import {SharingChoices} from './sharing-choices';
 import '@fontsource/noto-sans/latin-400.css';
 import '@fontsource/noto-sans/latin-700.css';
 import './style.css';
@@ -21,7 +22,7 @@ function App(){
  useEffect(()=>{document.querySelector('main')?.focus();},[route.screen]);
  const protectedRoute=!['start','add','preview','access','legacy-family'].includes(route.screen)||(route.screen==='add'&&Boolean(route.id));
  function start(){setDraft(blankPolicy());setPendingSave(false);go('add');}
- async function persist(){setBusy(true);setError('');try{const id=await save(draft);setPendingSave(false);go('policy',id);setTimeout(()=>setStatus('Policy saved.'),0);}catch(e){setPendingSave(false);go('preview');setTimeout(()=>setError(message(e,'Your policy wasn’t saved. Check your connection and try saving again.')),0);}finally{setBusy(false);}}
+ async function persist(){setBusy(true);setError('');try{const id=await save(draft);setPendingSave(false);go('share',id);}catch(e){setPendingSave(false);go('preview');setTimeout(()=>setError(message(e,'Your policy wasn’t saved. Check your connection and try saving again.')),0);}finally{setBusy(false);}}
  function requestSave(){if(isAuthenticated)void persist();else{setPendingSave(true);setTarget({screen:'preview'});handled.current=false;go('access');}}
  function openAccess(destination:Route){setTarget(destination);handled.current=false;go('access');}
  useEffect(()=>{if(route.screen==='access'&&isAuthenticated&&!isLoading&&!handled.current){handled.current=true;if(pendingSave)void persist();else go(target.screen,target.id);}},[route.screen,isAuthenticated,isLoading,pendingSave]);
@@ -29,9 +30,9 @@ function App(){
  let content:React.ReactNode;
  if((protectedRoute||route.screen==='access')&&isLoading)content=<Loading>Checking your account…</Loading>;
  else if(protectedRoute&&!isAuthenticated)content=<AuthScreen family={route.screen==='family'||route.screen==='guide'} onReady={()=>go(route.screen,route.id)} onBack={()=>go('start')}/>;
- else if(route.screen==='start')content=<section className="welcome"><h1>Help your family find your insurance and know what to do next.</h1><p>Prepare one policy at a time, check the claim steps, and share the information with the people who may need it.</p><div className="welcome-actions"><button className="primary" onClick={start}>Start with one policy</button><button className="text-button" onClick={()=>isAuthenticated?go('policies'):openAccess({screen:'policies'})}>Open my saved policies</button></div><p className="muted">Start with one policy. Add the others at your pace.</p><button className="text-button" onClick={()=>isAuthenticated?go('family'):openAccess({screen:'family'})}>Open information shared with me</button></section>;
+ else if(route.screen==='start')content=<section className="welcome"><h1>Help your family find your insurance and know what to do next.</h1><p>Save the essentials of one policy and share them with your family.</p><div className="welcome-actions"><button className="primary" onClick={start}>Start with one policy</button><button className="text-button" onClick={()=>isAuthenticated?go('policies'):openAccess({screen:'policies'})}>Open my saved policies</button></div><p className="muted">Start with one policy. Add the others at your pace.</p><button className="text-button" onClick={()=>isAuthenticated?go('family'):openAccess({screen:'family'})}>Open information shared with me</button></section>;
  else if(route.screen==='add')content=<PolicyEditor key={route.id||'draft'} initial={draft} onDraft={setDraft} id={route.id as Id<'insurancePolicies'>|undefined} busy={busy} onBack={()=>go(route.id?'policy':'start',route.id)} onReview={p=>{setDraft(p);go('preview');}} onSave={async(p,id)=>{setBusy(true);setError('');try{await save({...p,id});go('policy',id);setTimeout(()=>setStatus('Changes saved.'),0);}catch(e){setError(message(e,'Your changes weren’t saved. Try again.'));}finally{setBusy(false);}}}/>;
- else if(route.screen==='preview')content=<><Back onClick={()=>go('add')}>Back to details</Back><PolicyView policy={draft} preview onChange={()=>go('add')}/><div className="action-row"><button className="primary" disabled={busy||isLoading} onClick={requestSave}>{busy?'Saving your policy…':'Save my policy'}</button><span className="muted">Preview only. Not saved to your account.</span></div></>;
+ else if(route.screen==='preview')content=<><Back onClick={()=>go('add')}>Back to details</Back><h1>Share policy</h1><SharingChoices policy={draft} onPrivateLink={requestSave} busy={busy||isLoading}/><PolicyView policy={draft} preview onChange={()=>go('add')}/></>;
  else if(route.screen==='access')content=<AuthScreen family={target.screen==='family'||target.screen==='guide'} defaultCreate={pendingSave} onReady={()=>{}} onBack={()=>{setPendingSave(false);go(pendingSave?'preview':'start');}} busy={busy}/>;
  else if(route.screen==='policies')content=<><PolicyList onAdd={start}/>{legacy.current&&<section className="legacy"><h2>Your earlier policy</h2><p>Move the policy saved in this browser into your account. This turns off its old public link; you can share it with named recipients afterwards.</p><button className="text-button" disabled={busy} onClick={recover}>Recover earlier policy</button></section>}</>;
  else if(route.screen==='policy'&&route.id)content=<SavedPolicy id={route.id as Id<'insurancePolicies'>}/>;
