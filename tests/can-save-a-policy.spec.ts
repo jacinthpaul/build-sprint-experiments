@@ -1,21 +1,13 @@
-import { test, expect } from '@playwright/test';
-test('can preview, save and reopen one insurance policy', async ({ page, context, browser }) => {
- const errors: string[] = []; page.on('pageerror', e => errors.push(e.message));
- await page.goto('/');
- await page.getByLabel('Insurer', { exact: true }).fill('Demo Insurance');
- await page.getByLabel('Policy number', { exact: true }).fill('DEMO-001');
- await page.getByLabel('Nominee(s)', { exact: true }).fill('Demo Family Member');
- await page.getByLabel('Where the physical papers are kept').fill('Blue folder, top shelf');
- const family = page.getByRole('region', { name: 'For my family' });
- await expect(family).toContainText('Demo Insurance'); await expect(family).toContainText('DEMO-001'); await expect(family).toContainText('Blue folder, top shelf'); await expect(family).toContainText('death certificate');
- await page.getByLabel('Policy type', { exact: true }).selectOption('Health insurance'); await expect(family).toContainText('hospital bills'); await expect(family).not.toContainText('death certificate');
- await page.getByLabel('Policy type', { exact: true }).selectOption('Life insurance');
- await page.getByRole('button', { name: 'Save policy', exact: true }).click(); await expect(page.getByRole('status')).toContainText('Policy saved.');
- await page.reload(); await expect(page.getByLabel('Policy number', { exact: true })).toHaveValue('DEMO-001'); await expect(page.getByLabel('Nominee(s)', { exact: true })).toHaveValue('Demo Family Member');
- await page.getByLabel('Policy number', { exact: true }).fill('DEMO-002'); await page.getByRole('button', { name: 'Save policy', exact: true }).click(); await expect(page.getByRole('status')).toContainText('Policy saved.'); await page.reload(); await expect(page.getByLabel('Policy number', { exact: true })).toHaveValue('DEMO-002');
- await page.screenshot({ path: 'verification/desktop.png', fullPage: true });
- await page.setViewportSize({ width: 390, height: 844 }); await page.screenshot({ path: 'verification/mobile.png', fullPage: true }); expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
- const separate = await browser.newContext(); const other = await separate.newPage(); await other.goto('http://127.0.0.1:5173'); await expect(other.getByLabel('Insurer', { exact: true })).toBeEnabled(); await expect(other.getByLabel('Insurer', { exact: true })).toHaveValue(''); await separate.close();
- expect(errors).toEqual([]);
- console.log('Verified: live preview, policy-specific steps, Convex save, reload, update, mobile layout and separate-browser isolation.');
+import {test,expect} from '@playwright/test';
+const password='Kosh-demo-password-2026';
+test('can preview before signup, save multiple policies, update and reopen on another device',async({page,browser})=>{
+ test.setTimeout(120000);const email=`kosh-owner-${Date.now()}@example.com`;const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/');await page.getByRole('button',{name:'Start with one policy',exact:true}).click();
+ await page.getByLabel('Insurer',{exact:true}).fill('Demo Life Insurer');await page.getByLabel('Policy number',{exact:true}).fill('DEMO-LIFE-001');await page.getByLabel('Policy owner',{exact:true}).fill('Demo Owner');await page.getByLabel('Who or what is covered',{exact:true}).fill('Demo Owner');await page.getByLabel('Where the policy documents are kept').fill('Blue folder');
+ await page.getByRole('button',{name:'Review policy',exact:true}).click();await expect(page.getByRole('article')).toContainText('DEMO-LIFE-001');await expect(page.getByText('Preview — not saved',{exact:true})).toBeVisible();await expect(page.getByRole('article')).toContainText('Needs checking');
+ await page.getByRole('button',{name:'Save my policy',exact:true}).click();await expect(page.getByRole('heading',{name:'Create your account'})).toBeVisible();await page.getByLabel('Email address',{exact:true}).fill(email);await page.getByLabel('Password',{exact:true}).fill(password);await page.getByRole('button',{name:'Create account',exact:true}).click();await expect(page.getByRole('button',{name:'Share access',exact:true})).toBeVisible({timeout:30000});await expect(page.getByRole('article')).toContainText('Blue folder');
+ await page.getByRole('button',{name:'Back to policies',exact:true}).click();await page.getByRole('button',{name:'Add a policy',exact:true}).click();await page.getByLabel('Insurance type',{exact:true}).selectOption('Health insurance');await page.getByLabel('Insurer',{exact:true}).fill('Demo Health Insurer');await page.getByLabel('Policy number',{exact:true}).fill('DEMO-HEALTH-002');await page.getByRole('button',{name:'Review policy',exact:true}).click();await page.getByRole('button',{name:'Save my policy',exact:true}).click();await expect(page.getByRole('article')).toContainText('DEMO-HEALTH-002');await page.getByRole('button',{name:'Back to policies',exact:true}).click();await expect(page.getByRole('button',{name:/Demo Life Insurer/})).toBeVisible();await expect(page.getByRole('button',{name:/Demo Health Insurer/})).toBeVisible();
+ await page.getByRole('button',{name:/Demo Life Insurer/}).click();await page.getByRole('button',{name:'Change policy or guidance'}).click();await page.getByLabel('A note to my family',{exact:true}).fill('Updated note for my family.');await page.getByRole('button',{name:'Save changes',exact:true}).click();await expect(page.getByRole('article')).toContainText('Updated note for my family.');await page.reload();await expect(page.getByRole('article')).toContainText('Updated note for my family.');
+ const ctx=await browser.newContext({baseURL:new URL(page.url()).origin});const other=await ctx.newPage();await other.goto('/#screen=policies');await other.getByLabel('Email address',{exact:true}).fill(email);await other.getByLabel('Password',{exact:true}).fill(password);await other.getByRole('button',{name:'Sign in',exact:true}).click();await expect(other.getByRole('button',{name:/Demo Life Insurer/})).toBeVisible({timeout:30000});await expect(other.getByRole('button',{name:/Demo Health Insurer/})).toBeVisible();await ctx.close();
+ await page.setViewportSize({width:390,height:844});await expect.poll(()=>page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.screenshot({path:'verification/owner-mobile.png',fullPage:true});expect(errors).toEqual([]);
 });

@@ -1,0 +1,34 @@
+import { test, expect } from '@playwright/test';
+import { ConvexHttpClient } from 'convex/browser';
+import { randomBytes } from 'node:crypto';
+import { readFileSync } from 'node:fs';
+import { api } from '../convex/_generated/api';
+
+test('recovering an earlier policy preserves details and permanently retires its public link', async ({ page }) => {
+  const url = readFileSync('.env.local', 'utf8').match(/^CONVEX_URL=(.+)$/m)![1].trim();
+  const publicClient = new ConvexHttpClient(url);
+  const browserKey = randomBytes(32).toString('hex');
+  const token = randomBytes(32).toString('hex');
+  const old = { browserKey, insurer: 'Demo Earlier Insurer', policyNumber: 'DEMO-EARLIER-001', policyType: 'Life insurance' as const, nominee: 'Demo Family', paperLocation: 'Demo folder', firstAction: 'Ask the claims branch.', guideSource: 'Demo policy page 3' };
+  await publicClient.mutation(api.policies.save, old);
+  await publicClient.mutation(api.shares.enable, { browserKey, token });
+  expect(await publicClient.query(api.shares.get, { token })).toMatchObject({ policyNumber: old.policyNumber });
+  await page.goto('/');
+  await page.evaluate(key => localStorage.setItem('family-policy-key', key), browserKey);
+  await page.reload();
+  await page.getByRole('button', { name: 'Open my saved policies', exact: true }).click();
+  await page.getByRole('button', { name: 'New to Kosh? Create account' }).click();
+  await page.getByLabel('Email address', { exact: true }).fill(`kosh-recovery-${Date.now()}@example.com`);
+  await page.getByLabel('Password', { exact: true }).fill('Kosh-demo-password-2026');
+  await page.getByRole('button', { name: 'Create account', exact: true }).click();
+  await page.getByRole('button', { name: 'Recover earlier policy', exact: true }).click();
+  await expect(page.getByRole('article')).toContainText('DEMO-EARLIER-001');
+  await expect(page.getByRole('article')).toContainText('Demo folder');
+  await expect(page.getByRole('article')).toContainText('Ask the claims branch.');
+  expect(await publicClient.query(api.shares.get, { token })).toBeNull();
+  expect(await publicClient.query(api.policies.get, { browserKey })).toBeNull();
+  await expect(publicClient.mutation(api.shares.enable, { browserKey, token: randomBytes(32).toString('hex') })).rejects.toThrow(/moved into a Kosh account/);
+  await expect(publicClient.mutation(api.policies.save, old)).rejects.toThrow(/moved into a Kosh account/);
+  await page.reload();
+  await expect(page.getByRole('article')).toContainText('DEMO-EARLIER-001');
+});

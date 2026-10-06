@@ -8,6 +8,10 @@
  * @module
  */
 
+import type * as auth from "../auth.js";
+import type * as http from "../http.js";
+import type * as insurance from "../insurance.js";
+import type * as insuranceFields from "../insuranceFields.js";
 import type * as policies from "../policies.js";
 import type * as shares from "../shares.js";
 
@@ -18,6 +22,10 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  auth: typeof auth;
+  http: typeof http;
+  insurance: typeof insurance;
+  insuranceFields: typeof insuranceFields;
   policies: typeof policies;
   shares: typeof shares;
 }>;

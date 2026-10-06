@@ -6,6 +6,7 @@ export const status = query({
  args: { browserKey: v.string() }, returns: v.union(v.null(), v.string()),
  handler: async (ctx, { browserKey }) => {
   if (!isKey(browserKey)) return null;
+  if (await ctx.db.query("legacyImports").withIndex("by_key", q => q.eq("browserKey", browserKey)).unique()) return null;
   const policy = await ctx.db.query("policies").withIndex("by_browser_key", q => q.eq("browserKey", browserKey)).unique();
   if (!policy) return null;
   const share = await ctx.db.query("shares").withIndex("by_policy", q => q.eq("policyId", policy._id)).unique();
@@ -16,6 +17,7 @@ export const enable = mutation({
  args: { browserKey: v.string(), token: v.string() }, returns: v.string(),
  handler: async (ctx, { browserKey, token }) => {
   if (!isKey(browserKey) || !isKey(token) || browserKey === token) throw new Error("Invalid sharing key.");
+  if (await ctx.db.query("legacyImports").withIndex("by_key", q => q.eq("browserKey", browserKey)).unique()) throw new Error("This policy has moved into a Kosh account. Sign in to share it.");
   const policy = await ctx.db.query("policies").withIndex("by_browser_key", q => q.eq("browserKey", browserKey)).unique();
   if (!policy) throw new Error("Save your policy before sharing.");
   const existing = await ctx.db.query("shares").withIndex("by_policy", q => q.eq("policyId", policy._id)).unique();
@@ -45,6 +47,7 @@ export const get = query({
   if (!share) return null;
   const policy = await ctx.db.get(share.policyId);
   if (!policy) return null;
+  if (await ctx.db.query("legacyImports").withIndex("by_key", q => q.eq("browserKey", policy.browserKey)).unique()) return null;
   const { _id, _creationTime, browserKey, ...details } = policy;
   return details;
  }
