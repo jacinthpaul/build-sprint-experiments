@@ -51,7 +51,7 @@ export function PolicyEditor({initial, id, onReview, onSave, onBack, onDraft, bu
    <section className="form-section"><h2>Claim contact</h2>
     <label>Agent number or customer care details<textarea aria-label="Agent number or customer care details" rows={2} maxLength={4000} value={p.claimContact || ''} onChange={e=>change('claimContact',e.target.value)}/></label>
    </section>
-   <div className="action-row"><button className="primary" type="submit">{busy?'Saving…':id?'Save changes':'Share policy'}</button><span className="muted">{id?'Your other saved details will be kept.':'Choose a download, an email draft, or a private link next.'}</span></div>
+   <div className="action-row"><button className="primary" type="submit">{busy?'Saving…':id?'Save changes':'Share policy'}</button><span className="muted">{id?'Your other saved details will be kept.':'Choose a PDF download or a private link next.'}</span></div>
   </fieldset></form>
  </>;
 }

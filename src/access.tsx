@@ -27,7 +27,7 @@ export function ShareScreen({id}:{id:Id<'insurancePolicies'>}){
   <Back onClick={()=>go('policy',id)}>Back to policy</Back><h1>Share policy</h1>
   <p>{policyTitle(p)} · {p.policyNumber}</p><p className="muted">Saved to your account.</p>
   <Notice error={error} status={status}/>
-  {!confirm&&<SharingChoices policy={p} privateLink={access.length?link:undefined}>
+  {!confirm&&<SharingChoices policy={p}>
    <p className="muted">Your policy has a unique private link. Choose the family account that can open it. They can view the details; they cannot edit them.</p>
    <form onSubmit={submit}><fieldset disabled={busy}>
     <label>Recipient name<input aria-label="Recipient name" value={name} onChange={e=>setName(e.target.value)} required maxLength={200}/></label>
