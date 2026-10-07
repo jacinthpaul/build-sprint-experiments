@@ -64,7 +64,8 @@ export const messages = query({
     const checks = await ctx.db.query("familyAiSources").withIndex("by_thread", q => q.eq("threadId", row.threadId)).order("desc").take(40);
     const messages = history.page.filter(m => !m.tool && m.text && (m.message?.role === "user" || m.message?.role === "assistant")).reverse().map(m => {
       const check = checks.find(c => c.messageId === m._id);
-      return { id: m._id, role: m.message!.role as "user" | "assistant", text: m.text!, time: m._creationTime, searched: check?.searched ?? false, checkedAt: check?.checkedAt ?? null, sources: check?.sources ?? [] };
+      const text = m.finishReason === "length" ? `${m.text}\n\nThis answer was cut short. Ask Kosh to continue before relying on it.` : m.text!;
+      return { id: m._id, role: m.message!.role as "user" | "assistant", text, time: m._creationTime, searched: check?.searched ?? false, checkedAt: check?.checkedAt ?? null, sources: check?.sources ?? [] };
     });
     return { busy: row.activeUntil > Date.now(), messages };
   },

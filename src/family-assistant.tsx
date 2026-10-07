@@ -21,11 +21,12 @@ export function FamilyAssistant({ policyId, savedInsurer, demo = false }: { poli
   const [question, setQuestion] = useState(''), [busy, setBusy] = useState(false), [error, setError] = useState(''), [copied, setCopied] = useState('');
   const [recording, setRecording] = useState(false), [converting, setConverting] = useState(false), [speaking, setSpeaking] = useState('');
   const recorder = useRef<Awaited<ReturnType<typeof recordQuestion>> | null>(null), mounted = useRef(false);
+  const reader = useRef<SpeechSynthesisUtterance | null>(null);
   const canAsk = (demo || available === true) && !busy && !history?.busy && !recording && !converting;
   useEffect(() => {
     mounted.current = true;
     if (!demo && policyId) availability({ policyId }).then(value => { if (mounted.current) setAvailable(value); }).catch(() => { if (mounted.current) { setAvailable(false); setError('AI availability could not be checked. Try again.'); } });
-    return () => { mounted.current = false; recorder.current?.cancel(); window.speechSynthesis?.cancel(); };
+    return () => { mounted.current = false; recorder.current?.cancel(); reader.current = null; window.speechSynthesis?.cancel(); };
   }, [policyId, demo, availability]);
   async function send(mode: Mode, text: string) {
     if (!canAsk || !text.trim()) return;
@@ -62,29 +63,35 @@ export function FamilyAssistant({ policyId, savedInsurer, demo = false }: { poli
   }
   function readAnswer(id: string, text: string) {
     if (!window.speechSynthesis) { setError('Reading aloud is not supported on this device. The full answer is shown above.'); return; }
-    window.speechSynthesis.cancel();
+    reader.current = null; window.speechSynthesis.cancel(); setError('');
     if (speaking === id) { setSpeaking(''); return; }
     const utterance = new SpeechSynthesisUtterance(text.replace(/https?:\/\/\S+/g, '').replace(/[*#]/g, ''));
     // The answer may be in an earlier selected language, or one requested in the question.
     utterance.lang = /[\u0c00-\u0c7f]/.test(text) ? 'te-IN' : /[\u0b80-\u0bff]/.test(text) ? 'ta-IN' : /[\u0d00-\u0d7f]/.test(text) ? 'ml-IN' : /[\u0c80-\u0cff]/.test(text) ? 'kn-IN' : /[\u0980-\u09ff]/.test(text) ? 'bn-IN' : /[\u0900-\u097f]/.test(text) ? language === 'Marathi' ? 'mr-IN' : 'hi-IN' : 'en-IN';
     const voice = window.speechSynthesis.getVoices().find(v => v.lang.startsWith(utterance.lang.split('-')[0]));
     if (voice) utterance.voice = voice;
-    utterance.onend = () => setSpeaking(''); utterance.onerror = () => { setSpeaking(''); setError('This voice could not play. Try a voice supported by your device.'); };
+    reader.current = utterance;
+    utterance.onend = () => { if (mounted.current && reader.current === utterance) { reader.current = null; setSpeaking(''); } };
+    utterance.onerror = event => {
+      if (!mounted.current || reader.current !== utterance) return;
+      reader.current = null; setSpeaking('');
+      if (event.error !== 'canceled' && event.error !== 'interrupted') setError('This voice could not play. Try a voice supported by your device.');
+    };
     setSpeaking(id); window.speechSynthesis.speak(utterance);
   }
   if (history === null) return null;
   return <section className="family-ai" aria-labelledby="family-ai-title">
     <h2 id="family-ai-title" tabIndex={-1}>{demo?'Explore example family help':'A little help with what comes next'}</h2>
     <p>{demo?'These are prewritten examples using fictional details. They are not live AI answers, and no web search is performed.':'Ask Kosh about this policy, check current claim steps or draft a message to the insurer.'}</p>
-    {demo && <p className="notice">Live questions, web search and voice transcription are paused while AI billing is pending.</p>}
+    {demo && <p className="notice">For live AI help, sign in and open a policy shared with your account.</p>}
     {!demo && available === null && <p role="status" className="muted">Checking AI availability…</p>}
     {available === false && <div className="notice"><p>AI help isn't available yet. Your saved information and contact details are still here.</p><button className="text-button" disabled={checking} onClick={async () => { if (!policyId) return; setChecking(true); setError(''); try { setAvailable(await availability({ policyId })); } catch { setError('Could not connect. Try again.'); } finally { setChecking(false); } }}>{checking ? 'Checking…' : 'Check again'}</button></div>}
     {!demo && <details className="ai-context" open={!savedInsurer && available === true}>
       <summary>Insurer and claim situation</summary>
       <div className="ai-context-fields">
-        <label>Insurer name<input value={insurer} maxLength={100} onChange={e => setInsurer(e.target.value)} placeholder="For example, LIC"/><span className="hint">If you don't know, Kosh will help you find out.</span></label>
-        <label>Country where the policy was issued<input value={country} maxLength={60} onChange={e => setCountry(e.target.value)}/></label>
-        <label>What happened?<select value={situation} onChange={e => setSituation(e.target.value as Situation)}>{['Not sure yet','Death','Accident','Hospital treatment','Loss or damage','Travel problem'].map(s => <option key={s}>{s}</option>)}</select></label>
+        <label>Insurer name<input aria-label="Insurer name" value={insurer} maxLength={100} onChange={e => setInsurer(e.target.value)} placeholder="For example, LIC"/><span className="hint">If you don't know, Kosh will help you find out.</span></label>
+        <label>Country where the policy was issued<input aria-label="Country where the policy was issued" value={country} maxLength={60} onChange={e => setCountry(e.target.value)}/></label>
+        <label>What happened?<select aria-label="What happened?" value={situation} onChange={e => setSituation(e.target.value as Situation)}>{['Not sure yet','Death','Accident','Hospital treatment','Loss or damage','Travel problem'].map(s => <option key={s}>{s}</option>)}</select></label>
       </div>
     </details>}
     <label className="ai-language">{demo?'Example language':'Answer language'}<select aria-label={demo?'Example language':'Answer language'} value={language} onChange={e => setLanguage(e.target.value as Language)}>{(demo?['English','Telugu']:Object.keys(languageCodes)).map(l => <option key={l}>{l}</option>)}</select></label>
@@ -104,7 +111,7 @@ export function FamilyAssistant({ policyId, savedInsurer, demo = false }: { poli
       </article>)}
     </div>
     {(busy || history?.busy) && <p role="status" className="muted">Kosh is preparing your answer…</p>}
-    <label>Your question<textarea disabled={demo} rows={3} value={question} maxLength={2000} onChange={e => setQuestion(e.target.value)} placeholder={demo?'Live questions will be available in your private family page after AI is enabled.':"For example: the insurer hasn't replied. What can I do?"}/></label>
+    <label>Your question<textarea aria-label="Your question" disabled={demo} rows={3} value={question} maxLength={2000} onChange={e => setQuestion(e.target.value)} placeholder={demo?'Open a policy shared with your account to ask live questions.':"For example: the insurer hasn't replied. What can I do?"}/></label>
     <div className="ai-send"><button className="primary" disabled={demo || !canAsk || !question.trim()} onClick={() => send('question',question)}>Ask Kosh</button>
       <button className="text-button" disabled={demo || (!recording && (!canAsk || converting))} onClick={recording ? () => recorder.current?.stop() : startVoice}>{recording ? 'Stop recording' : converting ? 'Turning speech into text…' : 'Speak your question'}</button>
     </div>
