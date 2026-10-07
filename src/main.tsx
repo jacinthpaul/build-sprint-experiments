@@ -11,6 +11,7 @@ import {FamilyGuide,FamilyList,LegacyFamily,PolicyList,PolicyView,SavedPolicy} f
 import {AuthScreen,ShareScreen} from './access';
 import {SharingChoices} from './sharing-choices';
 import {HomeScreen} from './home-screen';
+import {FamilyDemo} from './family-demo';
 import '@fontsource/noto-sans/latin-400.css';
 import '@fontsource/noto-sans/latin-700.css';
 import './style.css';
@@ -21,7 +22,7 @@ function App(){
  const [target,setTarget]=useState<Route>({screen:'policies'});const [pendingSave,setPendingSave]=useState(false);const handled=useRef(false);const legacy=useRef(localStorage.getItem('family-policy-key'));
  useEffect(()=>{const update=()=>{setRoute(readRoute());setError('');setStatus('');};window.addEventListener('hashchange',update);return()=>window.removeEventListener('hashchange',update);},[]);
  useEffect(()=>{document.querySelector('main')?.focus();},[route.screen]);
- const protectedRoute=!['start','add','preview','access','legacy-family'].includes(route.screen)||(route.screen==='add'&&Boolean(route.id));
+ const protectedRoute=!['start','add','preview','access','legacy-family','demo'].includes(route.screen)||(route.screen==='add'&&Boolean(route.id));
  function start(){setDraft(blankPolicy());setPendingSave(false);go('add');}
  async function persist(){setBusy(true);setError('');try{const id=await save(draft);setPendingSave(false);go('share',id);}catch(e){setPendingSave(false);go('preview');setTimeout(()=>setError(message(e,'Your policy wasn’t saved. Check your connection and try saving again.')),0);}finally{setBusy(false);}}
  function requestSave(){if(isAuthenticated)void persist();else{setPendingSave(true);setTarget({screen:'preview'});handled.current=false;go('access');}}
@@ -31,7 +32,8 @@ function App(){
  let content:React.ReactNode;
  if((protectedRoute||route.screen==='access')&&isLoading)content=<Loading>Checking your account…</Loading>;
  else if(protectedRoute&&!isAuthenticated)content=<AuthScreen family={route.screen==='family'||route.screen==='guide'} onReady={()=>go(route.screen,route.id)} onBack={()=>go('start')}/>;
- else if(route.screen==='start')content=<HomeScreen onStart={start} onSaved={()=>isAuthenticated?go('policies'):openAccess({screen:'policies'})} onFamily={()=>isAuthenticated?go('family'):openAccess({screen:'family'})}/>;
+ else if(route.screen==='start')content=<HomeScreen onStart={start} onSaved={()=>isAuthenticated?go('policies'):openAccess({screen:'policies'})} onFamily={()=>isAuthenticated?go('family'):openAccess({screen:'family'})} onDemo={()=>go('demo')}/>;
+ else if(route.screen==='demo')content=<FamilyDemo/>;
  else if(route.screen==='add')content=<PolicyEditor key={route.id||'draft'} initial={draft} onDraft={setDraft} id={route.id as Id<'insurancePolicies'>|undefined} busy={busy} onBack={()=>go(route.id?'policy':'start',route.id)} onReview={p=>{setDraft(p);go('preview');}} onSave={async(p,id)=>{setBusy(true);setError('');try{await save({...p,id});go('policy',id);setTimeout(()=>setStatus('Changes saved.'),0);}catch(e){setError(message(e,'Your changes weren’t saved. Try again.'));}finally{setBusy(false);}}}/>;
  else if(route.screen==='preview')content=<><Back onClick={()=>go('add')}>Back to details</Back><h1>Share policy</h1><SharingChoices policy={draft} onPrivateLink={requestSave} busy={busy||isLoading}/><PolicyView policy={draft} preview onChange={()=>go('add')}/></>;
  else if(route.screen==='access')content=<AuthScreen family={target.screen==='family'||target.screen==='guide'} defaultCreate={pendingSave} onReady={()=>{}} onBack={()=>{setPendingSave(false);go(pendingSave?'preview':'start');}} busy={busy}/>;

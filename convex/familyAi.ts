@@ -43,6 +43,7 @@ export const availability = action({
     const userId = await getAuthUserId(ctx);
     if (!userId) throw new ConvexError("Sign in to use family help.");
     await ctx.runQuery(internal.familyAiData.context, { ...args, userId });
+    if (process.env.KOSH_AI_ENABLED !== "true") return false;
     try { await getServiceToken("ai-gateway"); return true; } catch { return false; }
   },
 });
@@ -58,6 +59,7 @@ export const ask = action({
     // Only business names and country names go to public search, never arbitrary chat text.
     if (args.insurer && !/^[\p{L}\s&.'()-]+$/u.test(args.insurer)) throw new ConvexError("Enter just the insurer's name, without policy numbers or contact details.");
     if (!/^[\p{L}\s.'()-]{2,60}$/u.test(args.country)) throw new ConvexError("Enter the country where this policy was issued.");
+    if (process.env.KOSH_AI_ENABLED !== "true") return { ok: false, message: "AI help isn't available yet. You can still use the saved policy and call the saved contact." };
     try { await getServiceToken("ai-gateway"); } catch {
       return { ok: false, message: "AI help isn't available yet. You can still use the saved policy and call the saved contact." };
     }
@@ -108,6 +110,7 @@ export const transcribe = action({
     if (!userId) throw new ConvexError("Sign in to use voice.");
     await ctx.runQuery(internal.familyAiData.context, { policyId: args.policyId, userId });
     if (args.audio.length > 1400000 || !/^[A-Za-z0-9+/]+={0,2}$/.test(args.audio)) throw new ConvexError("Record a shorter question, up to 30 seconds.");
+    if (process.env.KOSH_AI_ENABLED !== "true") throw new ConvexError("Voice transcription isn't available yet. Type your question instead.");
     try { await getServiceToken("ai-gateway"); } catch { throw new ConvexError("Voice transcription isn't available yet. Type your question instead."); }
     const requestId = crypto.randomUUID();
     await ctx.runMutation(internal.familyAiData.begin, { policyId: args.policyId, userId, requestId });

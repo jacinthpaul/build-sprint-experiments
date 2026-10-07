@@ -2,11 +2,12 @@ import type {Content,TDocumentDefinitions} from 'pdfmake/interfaces';
 import type {Policy} from './policy';
 import {familyNote,familyIntro,familyCaution} from './family-note';
 
-export async function downloadFamilyPdf(p:Policy){
+export async function downloadFamilyPdf(p:Policy,{sample=false}:{sample?:boolean}={}){
  const [{default:pdfMake},{default:fonts}]=await Promise.all([import('pdfmake/build/pdfmake'),import('pdfmake/build/vfs_fonts')]);
  pdfMake.addVirtualFileSystem(fonts);
  const note=familyNote(p);
  const content:Content[]=[
+  ...(sample?[{text:'SAMPLE ONLY — fictional policy details. Not a real insurance policy.',bold:true,color:'#234b70',margin:[0,0,0,16]} as Content]:[]),
   {text:'For my family',fontSize:26,color:'#234b70',margin:[0,0,0,12]},
   {text:familyIntro,margin:[0,0,0,18]},
   {table:{widths:[160,'*'],body:note.facts.map(([label,value])=>[{text:label,color:'#526578'},{text:value,bold:true}])},layout:'lightHorizontalLines',margin:[0,0,0,22]},

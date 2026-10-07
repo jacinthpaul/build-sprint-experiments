@@ -1,12 +1,13 @@
 import React from 'react';
 
-export function HomeScreen({onStart,onSaved,onFamily}:{onStart:()=>void;onSaved:()=>void;onFamily:()=>void}){
+export function HomeScreen({onStart,onSaved,onFamily,onDemo}:{onStart:()=>void;onSaved:()=>void;onFamily:()=>void;onDemo:()=>void}){
  return <div className="home-content">
   <section className="home-hero">
    <h1>Help your family find your insurance and know what to do next.</h1>
    <p className="home-intro">Save the essentials of one policy and share them with your family.</p>
    <button className="primary home-primary" onClick={onStart}>Start with one policy</button>
    <p className="muted home-start-hint">Start with one policy. Add the others at your pace.</p>
+   <button className="text-button home-demo" onClick={onDemo}>See a sample family page</button>
   </section>
   <div className="home-return">
    <section>
