@@ -7,6 +7,9 @@ export const optionalFields = { firstAction: v.optional(v.string()), guideSource
 export const policyFields = { insurer: v.string(), policyNumber: v.string(), policyType, nominee: v.string(), paperLocation: v.string(), ...optionalFields };
 export default defineSchema({
  ...authTables,
+ familyAiThreads: defineTable({ policyId: v.id("insurancePolicies"), userId: v.id("users"), threadId: v.string(), activeUntil: v.number(), requestId: v.string(), day: v.string(), requests: v.number() }).index("by_policy_user", ["policyId", "userId"]),
+ familyAiUsage: defineTable({ key: v.string(), day: v.string(), requests: v.number() }).index("by_key_day", ["key", "day"]),
+ familyAiSources: defineTable({ threadId: v.string(), messageId: v.string(), checkedAt: v.number(), searched: v.boolean(), sources: v.array(v.object({ url: v.string(), title: v.string() })) }).index("by_thread", ["threadId"]),
  insurancePolicies: defineTable({ ownerId: v.id("users"), updatedAt: v.number(), ...insuranceFields }).index("by_owner", ["ownerId"]),
  familyAccess: defineTable({ policyId: v.id("insurancePolicies"), ownerId: v.id("users"), recipientId: v.id("users"), recipientName: v.string() })
   .index("by_policy", ["policyId"]).index("by_recipient", ["recipientId"]).index("by_policy_recipient", ["policyId", "recipientId"]),

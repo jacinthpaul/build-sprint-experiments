@@ -10,6 +10,8 @@
 
 import type * as aiAvailability from "../aiAvailability.js";
 import type * as auth from "../auth.js";
+import type * as familyAi from "../familyAi.js";
+import type * as familyAiData from "../familyAiData.js";
 import type * as http from "../http.js";
 import type * as insurance from "../insurance.js";
 import type * as insuranceFields from "../insuranceFields.js";
@@ -25,6 +27,8 @@ import type {
 declare const fullApi: ApiFromModules<{
   aiAvailability: typeof aiAvailability;
   auth: typeof auth;
+  familyAi: typeof familyAi;
+  familyAiData: typeof familyAiData;
   http: typeof http;
   insurance: typeof insurance;
   insuranceFields: typeof insuranceFields;
@@ -60,4 +64,5 @@ export declare const internal: FilterApi<
 
 export declare const components: {
   staticHosting: import("@convex-dev/static-hosting/_generated/component.js").ComponentApi<"staticHosting">;
+  agent: import("@convex-dev/agent/_generated/component.js").ComponentApi<"agent">;
 };
