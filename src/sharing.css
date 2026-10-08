@@ -1,0 +1,13 @@
+.family-invitation { margin: 28px 0; padding: 24px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.family-invitation > h3 { margin: 0 0 20px; }
+.family-invitation label { margin-bottom: 16px; }
+.invitation-help { margin: 16px 0 20px; }
+.invitation-request { margin: 24px 0; padding: 24px 0; border-top: 1px solid var(--border); }
+.invitation-request h3 { margin: 0 0 12px; }
+.request-email { font-weight: 700; overflow-wrap: anywhere; }
+.invitation-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 20px; }
+.create-invitation { margin-top: 28px; }
+.sharing-choices > .link-choice:first-of-type { margin-top: 0; }
+.sharing-choices > .link-choice + .download-choice { margin-top: 24px; }
+.add-family-invitation summary { min-height: 48px; padding: 12px 0; cursor: pointer; text-decoration: underline; text-underline-offset: 4px; }
+@media (max-width: 600px) { .invitation-actions { align-items: stretch; flex-direction: column; gap: 12px; } }

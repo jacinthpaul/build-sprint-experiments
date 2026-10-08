@@ -11,6 +11,10 @@ export default defineSchema({
  familyAiUsage: defineTable({ key: v.string(), day: v.string(), requests: v.number() }).index("by_key_day", ["key", "day"]),
  familyAiSources: defineTable({ threadId: v.string(), messageId: v.string(), checkedAt: v.number(), searched: v.boolean(), sources: v.array(v.object({ url: v.string(), title: v.string() })) }).index("by_thread", ["threadId"]),
  insurancePolicies: defineTable({ ownerId: v.id("users"), updatedAt: v.number(), ...insuranceFields }).index("by_owner", ["ownerId"]),
+ familyInvitations: defineTable({ policyId: v.id("insurancePolicies"), ownerId: v.id("users"), recipientName: v.string(), token: v.string(), expiresAt: v.number(), state: v.union(v.literal("open"), v.literal("closed")) })
+  .index("by_token", ["token"]).index("by_policy_state_expiry", ["policyId", "state", "expiresAt"]),
+ familyInvitationRequests: defineTable({ invitationId: v.id("familyInvitations"), userId: v.id("users"), status: v.union(v.literal("pending"), v.literal("approved"), v.literal("declined")) })
+  .index("by_invitation", ["invitationId"]).index("by_invitation_user", ["invitationId", "userId"]).index("by_user_status", ["userId", "status"]),
  familyAccess: defineTable({ policyId: v.id("insurancePolicies"), ownerId: v.id("users"), recipientId: v.id("users"), recipientName: v.string() })
   .index("by_policy", ["policyId"]).index("by_recipient", ["recipientId"]).index("by_policy_recipient", ["policyId", "recipientId"]),
  legacyImports: defineTable({ browserKey: v.string(), ownerId: v.id("users"), policyId: v.id("insurancePolicies") }).index("by_key", ["browserKey"]),

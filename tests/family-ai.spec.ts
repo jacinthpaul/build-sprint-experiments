@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import { ConvexHttpClient } from 'convex/browser';
 import { api } from '../convex/_generated/api';
 import { readFileSync, writeFileSync } from 'node:fs';
+import { createInvitation, requestInvitation, approveInvitation } from './share-invitation';
 
 // Opt in because this test uses paid models. All accounts and policy facts are fictional.
 if (process.env.KOSH_TEST_VOICE_WAV) test.use({ launchOptions: { args: [
@@ -36,18 +37,17 @@ test('shared family AI cites current sources, translates, drafts, and keeps the 
   await page.getByRole('button', { name: 'Share policy', exact: true }).click();
   await page.getByRole('button', { name: 'Create private link', exact: true }).click();
   await signup(page, `kosh-ai-owner-${stamp}@example.com`);
-  await expect(page.getByRole('button', { name: 'Give access', exact: true })).toBeVisible({ timeout: 30000 });
+  await expect(page.getByRole('button', { name: 'Create family invitation', exact: true })).toBeVisible({ timeout: 30000 });
   const policyId = new URLSearchParams(new URL(page.url()).hash.slice(1)).get('id')! as any;
   const ctx = await browser.newContext({ baseURL: new URL(page.url()).origin, viewport: { width: 390, height: 844 }, permissions: ['microphone'] });
   const family = await ctx.newPage(); family.on('pageerror', e => errors.push(e.message));
   await family.goto('/#screen=family');
   await family.getByRole('button', { name: 'New to Kosh? Create account' }).click();
   await signup(family, `kosh-ai-family-${stamp}@example.com`);
-  await expect(family.getByLabel('Family access code', { exact: true })).not.toHaveValue('', { timeout: 30000 });
-  await page.getByLabel('Recipient name', { exact: true }).fill('AI Test Family');
-  await page.getByLabel('Recipient’s family access code', { exact: true }).fill(await family.getByLabel('Family access code', { exact: true }).inputValue());
-  await page.getByRole('button', { name: 'Give access', exact: true }).click();
-  await expect(page.getByRole('status')).toContainText('can now access');
+  await expect(family.getByRole('heading', { name: 'Information shared with you', exact: true })).toBeVisible({ timeout: 30000 });
+  const invitation = await createInvitation(page, 'AI Test Family');
+  await requestInvitation(family, invitation);
+  await approveInvitation(page, `kosh-ai-family-${stamp}@example.com`);
   const link = await page.getByLabel('Policy link', { exact: true }).inputValue();
   await family.goto(link);
   await expect(family.getByRole('button', { name: 'Ask Kosh', exact: true })).toBeEnabled({ timeout: 30000 });

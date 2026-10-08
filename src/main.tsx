@@ -12,6 +12,7 @@ import {AuthScreen,ShareScreen} from './access';
 import {SharingChoices} from './sharing-choices';
 import {HomeScreen} from './home-screen';
 import {FamilyDemo} from './family-demo';
+import {InvitationScreen} from './invitation-screen';
 import '@fontsource/noto-sans/latin-400.css';
 import '@fontsource/noto-sans/latin-700.css';
 import './style.css';
@@ -31,7 +32,7 @@ function App(){
  async function recover(){if(!legacy.current)return;setBusy(true);setError('');try{const id=await importLegacy({browserKey:legacy.current});if(id){localStorage.removeItem('family-policy-key');legacy.current=null;go('policy',id);setTimeout(()=>setStatus('Earlier policy recovered. Share it with named recipients; its old public link is now off.'),0);}else setError('No earlier policy is available for this account.');}catch(e){setError(message(e,'Your earlier policy couldn’t be recovered. Try again.'));}finally{setBusy(false);}}
  let content:React.ReactNode;
  if((protectedRoute||route.screen==='access')&&isLoading)content=<Loading>Checking your account…</Loading>;
- else if(protectedRoute&&!isAuthenticated)content=<AuthScreen family={route.screen==='family'||route.screen==='guide'} onReady={()=>go(route.screen,route.id)} onBack={()=>go('start')}/>;
+ else if(protectedRoute&&!isAuthenticated)content=<AuthScreen family={route.screen==='family'||route.screen==='guide'||route.screen==='invite'} onReady={()=>go(route.screen,route.id)} onBack={()=>go('start')}/>;
  else if(route.screen==='start')content=<HomeScreen onStart={start} onSaved={()=>isAuthenticated?go('policies'):openAccess({screen:'policies'})} onFamily={()=>isAuthenticated?go('family'):openAccess({screen:'family'})} onDemo={()=>go('demo')}/>;
  else if(route.screen==='demo')content=<FamilyDemo/>;
  else if(route.screen==='add')content=<PolicyEditor key={route.id||'draft'} initial={draft} onDraft={setDraft} id={route.id as Id<'insurancePolicies'>|undefined} busy={busy} onBack={()=>go(route.id?'policy':'start',route.id)} onReview={p=>{setDraft(p);go('preview');}} onSave={async(p,id)=>{setBusy(true);setError('');try{await save({...p,id});go('policy',id);setTimeout(()=>setStatus('Changes saved.'),0);}catch(e){setError(message(e,'Your changes weren’t saved. Try again.'));}finally{setBusy(false);}}}/>;
@@ -40,7 +41,8 @@ function App(){
  else if(route.screen==='policies')content=<><PolicyList onAdd={start}/>{legacy.current&&<section className="legacy"><h2>Your earlier policy</h2><p>Move the policy saved in this browser into your account. This turns off its old public link; you can share it with named recipients afterwards.</p><button className="text-button" disabled={busy} onClick={recover}>Recover earlier policy</button></section>}</>;
  else if(route.screen==='policy'&&route.id)content=<SavedPolicy id={route.id as Id<'insurancePolicies'>}/>;
  else if(route.screen==='share'&&route.id)content=<ShareScreen id={route.id as Id<'insurancePolicies'>}/>;
- else if(route.screen==='family')content=<FamilyList code={account?.id||''}/>;
+ else if(route.screen==='invite'&&route.id)content=<InvitationScreen token={route.id}/>;
+ else if(route.screen==='family')content=<FamilyList/>;
  else if(route.screen==='guide'&&route.id)content=<FamilyGuide id={route.id as Id<'insurancePolicies'>}/>;
  else if(route.screen==='legacy-family')content=<LegacyFamily token={route.id||''}/>;
  else content=<><h1>That page isn’t available.</h1><button className="primary" onClick={()=>go('start')}>Open Kosh</button></>;

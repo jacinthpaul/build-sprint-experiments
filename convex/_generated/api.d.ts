@@ -15,6 +15,7 @@ import type * as familyAiData from "../familyAiData.js";
 import type * as http from "../http.js";
 import type * as insurance from "../insurance.js";
 import type * as insuranceFields from "../insuranceFields.js";
+import type * as invitations from "../invitations.js";
 import type * as policies from "../policies.js";
 import type * as shares from "../shares.js";
 
@@ -32,6 +33,7 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   insurance: typeof insurance;
   insuranceFields: typeof insuranceFields;
+  invitations: typeof invitations;
   policies: typeof policies;
   shares: typeof shares;
 }>;
