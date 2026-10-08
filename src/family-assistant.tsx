@@ -32,7 +32,7 @@ export function FamilyAssistant({ policyId, savedInsurer, demo = false }: { poli
   const canAsk = (demo || available === true) && !busy && !history?.busy && !startingVoice && !recording && !converting;
   useEffect(() => {
     mounted.current = true;
-    if (!demo && policyId) availability({ policyId }).then(value => { if (mounted.current) setAvailable(value); }).catch(() => { if (mounted.current) { setAvailable(false); setError('AI availability could not be checked. Try again.'); } });
+    if (!demo && policyId) availability({ policyId }).then(value => { if (mounted.current) setAvailable(value); }).catch(() => { if (mounted.current) { setAvailable(false); setError('Kosh help could not be checked. Try again.'); } });
     return () => { mounted.current = false; recorder.current?.cancel(); reader.current = null; window.speechSynthesis?.cancel(); };
   }, [policyId, demo, availability]);
   useEffect(() => { if (expanded && choosingLanguage) languageInput.current?.focus(); }, [expanded, choosingLanguage]);
@@ -95,10 +95,10 @@ export function FamilyAssistant({ policyId, savedInsurer, demo = false }: { poli
   if (history === null) return null;
   return <section className="family-ai" aria-labelledby="family-ai-title">
     <h2 id="family-ai-title" tabIndex={-1}>{demo?'Explore example family help':'Kosh will guide you through'}</h2>
-    <p>{demo?'These are prewritten examples using fictional details. They are not live AI answers, and no web search is performed.':'Get an AI explanation of this policy, speak a question, or find your next claim step.'}</p>
+    <p>{demo?'These are prewritten examples using fictional details. They are not live answers, and no web search is performed.':'Get a personalised explanation of this policy, speak a question, or find your next claim step.'}</p>
     <div className="ai-feature-actions">
       <button className="primary ai-feature" aria-label="Ask Kosh" disabled={demo || !canAsk} onClick={() => send('question',question.trim() || 'Explain the saved details of this policy in plain language and help me understand what to do first. Keep missing information clear and do not assume coverage or a payout.')}>
-        <HelpIcon/><span><strong>Ask Kosh</strong><span>AI explains your policy and next steps.</span></span>
+        <HelpIcon/><span><strong>Ask Kosh</strong><span>Personalised guidance on your policy and next steps.</span></span>
       </button>
       <button className="secondary ai-feature" aria-label={recording?'Stop recording':startingVoice?'Starting microphone…':converting?'Turning speech into text…':'Speak your question'} disabled={demo || (!recording && (!canAsk || converting))} onClick={recording ? () => recorder.current?.stop() : startVoice}>
         <HelpIcon voice/><span><strong>{recording?'Stop recording':startingVoice?'Starting microphone…':converting?'Transcribing…':'Speak your question'}</strong><span>Voice help. Check the words before sending.</span></span>
@@ -112,9 +112,9 @@ export function FamilyAssistant({ policyId, savedInsurer, demo = false }: { poli
       <button className="secondary" disabled={!canAsk} onClick={() => { if (demo) void send('translate',`Show the first-step example in ${language}.`); else { setExpanded(true); setChoosingLanguage(true); languageInput.current?.focus(); } }}>{demo?`See ${language} example`:'Translate answer'}</button>
     </div>
     <p className="muted ai-help-hint">{demo?'Voice and live questions are available on your private family page.':'You can also read Kosh’s answers aloud. Your policy details are below.'}</p>
-    {demo && <p className="notice">For live AI help, sign in and open a policy shared with your account.</p>}
-    {!demo && available === null && <p role="status" className="muted">Checking AI availability…</p>}
-    {available === false && <div className="notice"><p>AI help isn't available yet. Your saved information and contact details are still here.</p><button className="text-button" disabled={checking} onClick={async () => { if (!policyId) return; setChecking(true); setError(''); try { setAvailable(await availability({ policyId })); } catch { setError('Could not connect. Try again.'); } finally { setChecking(false); } }}>{checking ? 'Checking…' : 'Check again'}</button></div>}
+    {demo && <p className="notice">For personalised help, sign in and open a policy shared with your account.</p>}
+    {!demo && available === null && <p role="status" className="muted">Checking Kosh help…</p>}
+    {available === false && <div className="notice"><p>Kosh help isn't available yet. Your saved information and contact details are still here.</p><button className="text-button" disabled={checking} onClick={async () => { if (!policyId) return; setChecking(true); setError(''); try { setAvailable(await availability({ policyId })); } catch { setError('Could not connect. Try again.'); } finally { setChecking(false); } }}>{checking ? 'Checking…' : 'Check again'}</button></div>}
     {expanded && <div className="ai-conversation-panel">
     {!demo && <details className="ai-context" open={!savedInsurer && available === true}>
       <summary>Insurer and claim situation</summary>
