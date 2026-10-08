@@ -50,17 +50,26 @@ test('shared family AI cites current sources, translates, drafts, and keeps the 
   await expect(page.getByRole('status')).toContainText('can now access');
   const link = await page.getByLabel('Policy link', { exact: true }).inputValue();
   await family.goto(link);
+  await expect(family.getByRole('button', { name: 'Ask Kosh', exact: true })).toBeEnabled({ timeout: 30000 });
+  const entry = await family.getByRole('button', { name: 'Ask Kosh', exact: true }).boundingBox();
+  expect(entry!.y + entry!.height).toBeLessThan(844);
+  await family.screenshot({ path: 'verification/family-ai-entry-mobile.png' });
+  await family.setViewportSize({ width: 1440, height: 900 });
+  await family.screenshot({ path: 'verification/family-ai-entry-desktop.png' });
+  await family.setViewportSize({ width: 390, height: 844 });
   await expect(family.getByRole('button', { name: 'What should I do first?', exact: true })).toBeEnabled({ timeout: 30000 });
+  await family.getByRole('button', { name: 'Translate answer', exact: true }).click();
   await family.getByLabel('Insurer name', { exact: false }).fill('LIC');
   await family.getByLabel('What happened?', { exact: false }).selectOption('Death');
   const client = await clientFor(family), owner = await clientFor(page);
   const conversation = () => client.query(api.familyAiData.messages, { policyId });
   await expect(family.getByRole('button', { name: 'What should I do first?', exact: true })).toBeEnabled({ timeout: 30000 });
   console.log('Checking real sourced claim guidance...');
-  await family.getByRole('button', { name: 'What should I do first?', exact: true }).click();
+  await family.getByRole('button', { name: 'Ask Kosh', exact: true }).click();
   await expect.poll(async () => { const h = await conversation(); return !h?.busy ? h?.messages.filter(m => m.role === 'assistant').length : 0; }, { timeout: 120000 }).toBe(1);
   const first = (await conversation())!.messages.find(m => m.role === 'assistant')!;
   expect(first.text.length).toBeGreaterThan(50); expect(first.searched).toBe(true);
+  expect(first.text).toContain('DEMO-AI-001');
   expect(first.sources.some(s => new URL(s.url).hostname.endsWith('licindia.in'))).toBe(true);
   expect(first.checkedAt).toBeGreaterThan(Date.now() - 180000);
   await expect(family.getByText('Web sources checked', { exact: false })).toBeVisible();
@@ -94,7 +103,7 @@ test('shared family AI cites current sources, translates, drafts, and keeps the 
     await family.getByRole('button', { name: 'Stop recording', exact: true }).click();
     await expect(family.getByLabel('Your question', { exact: true })).toHaveValue(/where.*policy.*doc/i, { timeout: 90000 });
     expect((await conversation())!.messages.filter(m => m.role === 'assistant')).toHaveLength(3);
-    await expect(family.getByRole('button', { name: 'Ask Kosh', exact: true })).toBeEnabled();
+    await expect(family.getByRole('button', { name: 'Send question', exact: true })).toBeEnabled();
   }
   expect(await family.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await family.screenshot({ path: 'verification/live-ai-mobile.png', fullPage: true });

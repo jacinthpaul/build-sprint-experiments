@@ -10,6 +10,11 @@ const languageCodes = { English: 'en-IN', Hindi: 'hi-IN', Telugu: 'te-IN', Tamil
 type Language = keyof typeof languageCodes;
 type Mode = 'next' | 'latest' | 'draft' | 'translate' | 'question';
 type Situation = 'Not sure yet' | 'Death' | 'Accident' | 'Hospital treatment' | 'Loss or damage' | 'Travel problem';
+function HelpIcon({ voice = false }: { voice?: boolean }) {
+  return <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    {voice ? <><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11v1a7 7 0 0 0 14 0v-1M12 19v3M9 22h6"/></> : <><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5H4l-1 1v-9.5a8.5 8.5 0 0 1 17 0Z"/><path d="M7 10h9M7 14h6"/></>}
+  </svg>;
+}
 export function FamilyAssistant({ policyId, savedInsurer, demo = false }: { policyId?: Id<'insurancePolicies'>; savedInsurer: string; demo?: boolean }) {
   const ask = useAction(api.familyAi.ask), availability = useAction(api.familyAi.availability), transcribe = useAction(api.familyAi.transcribe);
   const savedHistory = useQuery(api.familyAiData.messages, !demo && policyId ? { policyId } : 'skip');
@@ -22,14 +27,19 @@ export function FamilyAssistant({ policyId, savedInsurer, demo = false }: { poli
   const [recording, setRecording] = useState(false), [converting, setConverting] = useState(false), [speaking, setSpeaking] = useState('');
   const recorder = useRef<Awaited<ReturnType<typeof recordQuestion>> | null>(null), mounted = useRef(false);
   const reader = useRef<SpeechSynthesisUtterance | null>(null);
+  const [expanded, setExpanded] = useState(false), [choosingLanguage, setChoosingLanguage] = useState(false);
+  const questionInput = useRef<HTMLTextAreaElement | null>(null), languageInput = useRef<HTMLSelectElement | null>(null);
   const canAsk = (demo || available === true) && !busy && !history?.busy && !recording && !converting;
   useEffect(() => {
     mounted.current = true;
     if (!demo && policyId) availability({ policyId }).then(value => { if (mounted.current) setAvailable(value); }).catch(() => { if (mounted.current) { setAvailable(false); setError('AI availability could not be checked. Try again.'); } });
     return () => { mounted.current = false; recorder.current?.cancel(); reader.current = null; window.speechSynthesis?.cancel(); };
   }, [policyId, demo, availability]);
+  useEffect(() => { if (expanded && choosingLanguage) languageInput.current?.focus(); }, [expanded, choosingLanguage]);
+  useEffect(() => { if (!demo && history?.messages.length) setExpanded(true); }, [demo, history?.messages.length]);
   async function send(mode: Mode, text: string) {
     if (!canAsk || !text.trim()) return;
+    setExpanded(true);
     if (demo) {
       if (!['next','draft','translate'].includes(mode)) return;
       const answer = mode === 'draft' ? exampleEscalation : language === 'Telugu' ? exampleTelugu : exampleFirstStep;
@@ -47,6 +57,7 @@ export function FamilyAssistant({ policyId, savedInsurer, demo = false }: { poli
   }
   async function startVoice() {
     if (!canAsk || demo || !policyId) return;
+    setExpanded(true);
     setError(''); setRecording(true);
     try {
       recorder.current = await recordQuestion(async audio => {
@@ -54,7 +65,7 @@ export function FamilyAssistant({ policyId, savedInsurer, demo = false }: { poli
         setRecording(false); setConverting(true);
         try {
           const text = await transcribe({ policyId, audio });
-          if (mounted.current) setQuestion(text);
+          if (mounted.current) { setQuestion(text); questionInput.current?.focus(); }
         } catch { if (mounted.current) setError('The recording could not be understood. Type your question or try again.'); }
         finally { if (mounted.current) setConverting(false); }
       }, () => { if (mounted.current) { setRecording(false); setError('Recording failed. Type your question instead.'); } });
@@ -81,11 +92,28 @@ export function FamilyAssistant({ policyId, savedInsurer, demo = false }: { poli
   }
   if (history === null) return null;
   return <section className="family-ai" aria-labelledby="family-ai-title">
-    <h2 id="family-ai-title" tabIndex={-1}>{demo?'Explore example family help':'A little help with what comes next'}</h2>
-    <p>{demo?'These are prewritten examples using fictional details. They are not live AI answers, and no web search is performed.':'Ask Kosh about this policy, check current claim steps or draft a message to the insurer.'}</p>
+    <h2 id="family-ai-title" tabIndex={-1}>{demo?'Explore example family help':'Kosh will guide you through'}</h2>
+    <p>{demo?'These are prewritten examples using fictional details. They are not live AI answers, and no web search is performed.':'Get an AI explanation of this policy, speak a question, or find your next claim step.'}</p>
+    <div className="ai-feature-actions">
+      <button className="primary ai-feature" aria-label="Ask Kosh" disabled={demo || !canAsk} onClick={() => send('question',question.trim() || 'Explain the saved details of this policy in plain language and help me understand what to do first. Keep missing information clear and do not assume coverage or a payout.')}>
+        <HelpIcon/><span><strong>Ask Kosh</strong><span>AI explains your policy and next steps.</span></span>
+      </button>
+      <button className="secondary ai-feature" aria-label={recording?'Stop recording':converting?'Turning speech into text…':'Speak your question'} disabled={demo || (!recording && (!canAsk || converting))} onClick={recording ? () => recorder.current?.stop() : startVoice}>
+        <HelpIcon voice/><span><strong>{recording?'Stop recording':converting?'Transcribing…':'Speak your question'}</strong><span>Voice help. Check the words before sending.</span></span>
+      </button>
+    </div>
+    {recording && <p role="status">Recording, up to 30 seconds. Tap Stop recording when you're ready.</p>}
+    <div className="ai-starters" aria-label="Ways Kosh can help">
+      <button className="secondary" disabled={!canAsk} onClick={() => send('next','Help me take the first step for a claim on this policy.')}>{demo?'See first-step example':'What should I do first?'}</button>
+      <button className="secondary" disabled={demo || !canAsk} onClick={() => send('latest','Check the latest official claim requirements for this policy and show your sources.')}>Check latest claim steps</button>
+      <button className="secondary" disabled={!canAsk} onClick={() => send('draft',question.trim() || 'Help me draft an escalation to the insurer. Ask me what you need to know first.')}>{demo?'See sample escalation (English)':'Draft an escalation'}</button>
+      <button className="secondary" disabled={!canAsk} onClick={() => { if (demo) void send('translate',`Show the first-step example in ${language}.`); else { setExpanded(true); setChoosingLanguage(true); languageInput.current?.focus(); } }}>{demo?`See ${language} example`:'Translate answer'}</button>
+    </div>
+    <p className="muted ai-help-hint">{demo?'Voice and live questions are available on your private family page.':'You can also read Kosh’s answers aloud. Your policy details are below.'}</p>
     {demo && <p className="notice">For live AI help, sign in and open a policy shared with your account.</p>}
     {!demo && available === null && <p role="status" className="muted">Checking AI availability…</p>}
     {available === false && <div className="notice"><p>AI help isn't available yet. Your saved information and contact details are still here.</p><button className="text-button" disabled={checking} onClick={async () => { if (!policyId) return; setChecking(true); setError(''); try { setAvailable(await availability({ policyId })); } catch { setError('Could not connect. Try again.'); } finally { setChecking(false); } }}>{checking ? 'Checking…' : 'Check again'}</button></div>}
+    {expanded && <div className="ai-conversation-panel">
     {!demo && <details className="ai-context" open={!savedInsurer && available === true}>
       <summary>Insurer and claim situation</summary>
       <div className="ai-context-fields">
@@ -94,13 +122,8 @@ export function FamilyAssistant({ policyId, savedInsurer, demo = false }: { poli
         <label>What happened?<select aria-label="What happened?" value={situation} onChange={e => setSituation(e.target.value as Situation)}>{['Not sure yet','Death','Accident','Hospital treatment','Loss or damage','Travel problem'].map(s => <option key={s}>{s}</option>)}</select></label>
       </div>
     </details>}
-    <label className="ai-language">{demo?'Example language':'Answer language'}<select aria-label={demo?'Example language':'Answer language'} value={language} onChange={e => setLanguage(e.target.value as Language)}>{(demo?['English','Telugu']:Object.keys(languageCodes)).map(l => <option key={l}>{l}</option>)}</select></label>
-    <div className="ai-starters" aria-label="Ways Kosh can help">
-      <button className="secondary" disabled={!canAsk} onClick={() => send('next','Help me take the first step for a claim on this policy.')}>{demo?'See first-step example':'What should I do first?'}</button>
-      <button className="secondary" disabled={demo || !canAsk} onClick={() => send('latest','Check the latest official claim requirements for this policy and show your sources.')}>Check latest claim steps</button>
-      <button className="secondary" disabled={!canAsk} onClick={() => send('draft',question.trim() || 'Help me draft an escalation to the insurer. Ask me what you need to know first.')}>{demo?'See sample escalation (English)':'Draft an escalation'}</button>
-      <button className="secondary" disabled={!canAsk} onClick={() => send('translate',`Translate your latest answer into ${language}. If there is no answer yet, explain the saved policy details in ${language}. Preserve every name, number, date and uncertainty.`)}>{demo?`See ${language} example`:`Translate into ${language}`}</button>
-    </div>
+    <div className="ai-translation"><label className="ai-language">{demo?'Example language':'Answer language'}<select ref={languageInput} aria-label={demo?'Example language':'Answer language'} value={language} onChange={e => setLanguage(e.target.value as Language)}>{(demo?['English','Telugu']:Object.keys(languageCodes)).map(l => <option key={l}>{l}</option>)}</select></label>
+    {!demo && <button className="secondary" disabled={!canAsk} onClick={() => send('translate',`Translate your latest answer into ${language}. If there is no answer yet, explain the saved policy details in ${language}. Preserve every name, number, date and uncertainty.`)}>Translate into {language}</button>}</div>
     <div className="ai-messages" aria-label="Your private conversation">
       {history === undefined ? <p className="muted">Loading your conversation…</p> : history.messages.length === 0 ? <p className="muted">{demo?'Choose an example above to see how family help could look.':'You can start with one question. Only you can see this conversation.'}</p> : history.messages.map(m => <article className={'ai-message ' + m.role} key={m.id}>
         <h3>{m.role === 'user' ? demo?'Example question':'You' : demo?'Prewritten example answer':'Kosh'}</h3><p className="preserve">{m.text}</p>
@@ -111,12 +134,10 @@ export function FamilyAssistant({ policyId, savedInsurer, demo = false }: { poli
       </article>)}
     </div>
     {(busy || history?.busy) && <p role="status" className="muted">Kosh is preparing your answer…</p>}
-    <label>Your question<textarea aria-label="Your question" disabled={demo} rows={3} value={question} maxLength={2000} onChange={e => setQuestion(e.target.value)} placeholder={demo?'Open a policy shared with your account to ask live questions.':"For example: the insurer hasn't replied. What can I do?"}/></label>
-    <div className="ai-send"><button className="primary" disabled={demo || !canAsk || !question.trim()} onClick={() => send('question',question)}>Ask Kosh</button>
-      <button className="text-button" disabled={demo || (!recording && (!canAsk || converting))} onClick={recording ? () => recorder.current?.stop() : startVoice}>{recording ? 'Stop recording' : converting ? 'Turning speech into text…' : 'Speak your question'}</button>
-    </div>
-    {recording && <p role="status">Recording, up to 30 seconds. Tap Stop recording when you're ready.</p>}
+    <label>Your question<textarea ref={questionInput} aria-label="Your question" disabled={demo} rows={3} value={question} maxLength={2000} onChange={e => setQuestion(e.target.value)} placeholder={demo?'Open a policy shared with your account to ask live questions.':"For example: the insurer hasn't replied. What can I do?"}/></label>
+    <div className="ai-send"><button className="secondary" disabled={demo || !canAsk || !question.trim()} onClick={() => send('question',question)}>Send question</button></div>
     <p className="muted ai-small">{demo?'This public sample uses no personal data or AI calls. Reading an example aloud uses your device’s available voices.':'Voice fills in your question so you can check it before sending. Kosh sends the policy and your question to AI through Convex, and saves your conversation for your account. Public searches use the insurer, country and claim situation. Audio is sent for transcription and is not saved in Kosh.'}</p>
+    </div>}
     {error && <p role="alert" className="error">{error}</p>}
     <p className="muted ai-small">Kosh helps you prepare. The insurer confirms coverage and claim requirements. Check any draft before sending it.</p>
   </section>;

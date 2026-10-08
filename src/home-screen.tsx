@@ -4,7 +4,7 @@ export function HomeScreen({onStart,onSaved,onFamily,onDemo}:{onStart:()=>void;o
  return <div className="home-content">
   <section className="home-hero">
    <h1>Help your family find your insurance and know what to do next.</h1>
-   <p className="home-intro">Save the essentials of one policy and share them with your family.</p>
+   <p className="home-intro">Share your insurance details. When your family needs them, Kosh’s AI will guide them through what to do next.</p>
    <button className="primary home-primary" onClick={onStart}>Start with one policy</button>
    <p className="muted home-start-hint">Start with one policy. Add the others at your pace.</p>
    <button className="text-button home-demo" onClick={onDemo}>See a sample family page</button>
@@ -16,16 +16,18 @@ export function HomeScreen({onStart,onSaved,onFamily,onDemo}:{onStart:()=>void;o
    </section>
    <section>
     <button className="text-button" onClick={onFamily} aria-describedby="shared-information-help">Open information shared with me</button>
-    <p id="shared-information-help" className="muted">Use this when someone has shared their insurance with you. Sign in to your own account to view their policy details and download the family note.</p>
+    <p id="shared-information-help" className="muted">Use this when someone has shared their insurance with you. Open their policy, ask Kosh for help, or speak your question.</p>
    </section>
   </div>
   <aside className="home-note-preview" aria-label="Preview of a family note">
    <h2>For my family</h2>
-   <p>You don’t have to figure out where to start.</p>
+   <p>Your policy details, with Kosh to guide you.</p>
    <ul>
     <li>Insurance details</li>
     <li>Where the policy copy is kept</li>
     <li>Who to contact</li>
+    <li>AI explanations and current claim guidance</li>
+    <li>Voice help, translation and escalation drafts</li>
    </ul>
    <p className="muted home-preview-caption">Preview of a family note</p>
   </aside>
