@@ -4,6 +4,8 @@ import {api} from '../convex/_generated/api';
 import type {Id} from '../convex/_generated/dataModel';
 import {blankPolicy, policyTypes, savedContact, type Policy} from './policy';
 import {Back, Loading, Notice, go} from './common';
+import {PolicyPreview} from './policy-preview';
+import './policy-editor.css';
 
 export function PolicyEditor({initial, id, onReview, onSave, onBack, onDraft, busy}: {
  initial: Policy; id?: Id<'insurancePolicies'>; onReview: (p:Policy)=>void;
@@ -13,6 +15,8 @@ export function PolicyEditor({initial, id, onReview, onSave, onBack, onDraft, bu
  const stored = useQuery(api.insurance.get, id ? {id} : 'skip');
  const [p, setP] = useState(initial);
  const [error, setError] = useState('');
+ const [mobileView, setMobileView] = useState<'details'|'preview'>('details');
+ const [activeField, setActiveField] = useState('');
  const hydrated = useRef(false);
  useEffect(() => {
   if (id && stored && !hydrated.current) {
@@ -38,9 +42,14 @@ export function PolicyEditor({initial, id, onReview, onSave, onBack, onDraft, bu
  if (id && stored===null) return <><h1>This policy isn’t available.</h1><Back onClick={()=>go('policies')}>Back to policies</Back></>;
  return <>
   <Back onClick={onBack}/><h1>{id?'Edit policy':'Add one policy'}</h1>
-  <p className="muted">Keep the essentials together. Add what you know.</p>
+  <p className="muted">Add what you know. See how it will look for your family.</p>
   <Notice error={error}/>
-  <form onSubmit={submit}><fieldset disabled={busy}>
+  <div className="policy-editor-views" aria-label="Policy entry views">
+   <button type="button" aria-pressed={mobileView==='details'} aria-controls="policy-editor-form" onClick={()=>setMobileView('details')}>Policy details</button>
+   <button type="button" aria-pressed={mobileView==='preview'} aria-controls="family-policy-preview" onClick={()=>setMobileView('preview')}>Family preview</button>
+  </div>
+  <div className="policy-editor-layout" data-mobile-view={mobileView}>
+  <form className="policy-entry-form" id="policy-editor-form" onSubmit={submit} onFocusCapture={event=>setActiveField(event.target.getAttribute('aria-label')||'')}><fieldset disabled={busy}>
    <section className="form-section"><h2>Policy details</h2>
     <label>Insurance type<select aria-label="Insurance type" value={p.policyType} onChange={e=>change('policyType',e.target.value)}>{policyTypes.map(type=><option key={type}>{type}</option>)}</select></label>
     <label>Policy number<input aria-label="Policy number" value={p.policyNumber} required maxLength={4000} onChange={e=>change('policyNumber',e.target.value)}/></label>
@@ -53,5 +62,7 @@ export function PolicyEditor({initial, id, onReview, onSave, onBack, onDraft, bu
    </section>
    <div className="action-row"><button className="primary" type="submit">{busy?'Saving…':id?'Save changes':'Share policy'}</button><span className="muted">{id?'Your other saved details will be kept.':'Choose a PDF download or a private link next.'}</span></div>
   </fieldset></form>
+  <PolicyPreview policy={p} activeField={activeField} onDetails={()=>setMobileView('details')}/>
+  </div>
  </>;
 }
