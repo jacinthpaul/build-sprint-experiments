@@ -18,6 +18,7 @@ export const insuranceFields = {
   coverage: v.string(), exclusions: v.string(), coverageSource: v.string(),
   sumAssured: v.string(), personalNote: v.string(), guides: v.array(claimGuide),
   claimContact: v.optional(v.string()),
+  claimContactName: v.optional(v.string()), claimContactPhone: v.optional(v.string()),
 };
 export const insuranceDoc = v.object({
   _id: v.id("insurancePolicies"), _creationTime: v.number(), ownerId: v.id("users"),

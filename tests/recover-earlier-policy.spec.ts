@@ -3,6 +3,7 @@ import { ConvexHttpClient } from 'convex/browser';
 import { randomBytes } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { api } from '../convex/_generated/api';
+import {fillRequiredPolicy} from './policy-input';
 
 test('recovering an earlier policy preserves details and permanently retires its public link', async ({ page }) => {
   const url = readFileSync('.env.local', 'utf8').match(/^CONVEX_URL=(.+)$/m)![1].trim();
@@ -32,7 +33,8 @@ test('recovering an earlier policy preserves details and permanently retires its
   await page.reload();
   await expect(page.getByRole('article')).toContainText('DEMO-EARLIER-001');
   await page.getByRole('button', {name:'Change policy details',exact:true}).click();
-  await expect(page.locator('form input, form select, form textarea')).toHaveCount(6);
+  await expect(page.getByLabel('Insurance company',{exact:true})).toHaveValue('Demo Earlier Insurer');
+  await fillRequiredPolicy(page,'Demo Earlier Insurer');
   await page.getByLabel('Where the hard or soft copy is kept', {exact:true}).fill('Moved demo folder');
   await page.getByRole('button', {name:'Save changes',exact:true}).click();
   await expect(page.getByRole('article')).toContainText('Moved demo folder');

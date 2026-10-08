@@ -24,6 +24,8 @@
 .policy-editor-views button[aria-pressed="true"] { color: var(--text); border-bottom-color: var(--accent); }
 .policy-editor-views button:hover { color: var(--text); }
 .policy-preview-back { margin-top: 16px; }
+.field-error { display: block; color: var(--error); font-size: 16px; margin-top: 8px; }
+[aria-invalid="true"] { border-color: var(--error); }
 @media (max-width: 899px) {
   .policy-editor-layout[data-mobile-view="details"] .policy-preview,
   .policy-editor-layout[data-mobile-view="preview"] .policy-entry-form { display: none; }

@@ -1,11 +1,40 @@
 ﻿import {test,expect} from '@playwright/test';
+import {fillRequiredPolicy} from './policy-input';
 const types=['Life insurance','Health insurance','Personal accident insurance','Motor insurance','Home insurance','Travel insurance','Other insurance'];
-test('all insurance types use six fields, retain drafts and show only the new missing details',async({page})=>{
+test('all insurance types require insurer and valid contact, while optional details and unfinished drafts stay available',async({page})=>{
  await page.setViewportSize({width:390,height:844});await page.goto('/');
  for(const type of types){
-  await page.getByRole('button',{name:'Start with one policy',exact:true}).click();await expect(page.locator('form input, form select, form textarea')).toHaveCount(6);
-  await page.getByLabel('Insurance type',{exact:true}).selectOption(type);await page.getByLabel('Policy number',{exact:true}).fill(`DEMO-${type}`);await page.getByRole('button',{name:'Share policy',exact:true}).click();await expect(page.getByRole('article')).toContainText(type);await expect(page.getByRole('article')).toContainText('Not recorded');await expect(page.getByRole('article')).not.toContainText('Coverage source');await expect(page.getByRole('article')).not.toContainText('Sourced first claim action');await expect(page.getByRole('link',{name:/Call/})).toHaveCount(0);expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.getByRole('link',{name:'Kosh home',exact:true}).click();
+  await page.getByRole('button',{name:'Start with one policy',exact:true}).click();
+  await page.getByLabel('Insurance type',{exact:true}).selectOption(type);
+  await page.getByLabel('Policy number',{exact:true}).fill(`DEMO-${type}`);
+  await fillRequiredPolicy(page);
+  await page.getByRole('button',{name:'Share policy',exact:true}).click();
+  await expect(page.getByRole('article')).toContainText(type);
+  await expect(page.getByRole('article')).toContainText('Demo Insurance');
+  await expect(page.getByRole('article')).toContainText('Not recorded');
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  await page.getByRole('link',{name:'Kosh home',exact:true}).click();
+  await page.getByRole('button',{name:'Start a new policy',exact:true}).click();
+  await page.getByRole('button',{name:'Start blank policy',exact:true}).click();
+  await expect(page.getByLabel('Policy number',{exact:true})).toHaveValue('');
+  await page.getByRole('link',{name:'Kosh home',exact:true}).click();
  }
- await page.getByRole('button',{name:'Start with one policy',exact:true}).click();await page.getByLabel('Policy number',{exact:true}).fill('DRAFT-CHECK');await page.getByLabel('Agent number or customer care details',{exact:true}).fill('Keep these contact details.');await page.getByLabel('Insurance type',{exact:true}).selectOption('Travel insurance');await expect(page.getByLabel('Agent number or customer care details',{exact:true})).toHaveValue('Keep these contact details.');await page.getByRole('button',{name:'Back',exact:true}).click();await page.goBack();await expect(page.getByLabel('Policy number',{exact:true})).toHaveValue('DRAFT-CHECK');await expect(page.getByLabel('Agent number or customer care details',{exact:true})).toHaveValue('Keep these contact details.');
- await page.getByLabel('Policy number',{exact:true}).fill(' ');await page.getByRole('button',{name:'Share policy',exact:true}).click();await expect(page.getByRole('alert')).toContainText('Add the policy number');await page.screenshot({path:'verification/policy-form-mobile.png',fullPage:true});
+ await page.getByRole('button',{name:'Start with one policy',exact:true}).click();
+ await page.getByLabel('Policy number',{exact:true}).fill('DRAFT-CHECK');
+ await page.getByLabel('Contact name',{exact:true}).fill('Saved draft contact');
+ await page.getByRole('link',{name:'Home',exact:true}).click();
+ await page.getByRole('button',{name:'Continue draft',exact:true}).click();
+ await expect(page.getByLabel('Policy number',{exact:true})).toHaveValue('DRAFT-CHECK');
+ await expect(page.getByLabel('Contact name',{exact:true})).toHaveValue('Saved draft contact');
+ await page.getByRole('button',{name:'Share policy',exact:true}).click();
+ await expect(page.getByRole('alert')).toContainText('insurance company');
+ await expect(page.getByLabel('Insurance company',{exact:true})).toBeFocused();
+ await page.getByLabel('Insurance company',{exact:true}).fill('Demo Insurance');
+ await page.getByLabel('Contact phone number',{exact:true}).fill('0000000000');
+ await page.getByRole('button',{name:'Share policy',exact:true}).click();
+ await expect(page.getByRole('alert')).toContainText('valid phone number');
+ await expect(page.getByLabel('Policy number',{exact:true})).toHaveValue('DRAFT-CHECK');
+ await page.getByLabel('Contact phone number',{exact:true}).fill('1800 11 2211');
+ await page.getByRole('button',{name:'Share policy',exact:true}).click();
+ await expect(page.getByRole('heading',{name:'Share policy',exact:true})).toBeVisible();
 });

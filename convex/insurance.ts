@@ -4,6 +4,7 @@ import { query, mutation } from "./_generated/server";
 import { insuranceFields, insuranceDoc } from "./insuranceFields";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
+import { contactPhone, essentialErrors } from "../shared/contact";
 
 function validDate(value: string) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
@@ -52,7 +53,9 @@ export const save = mutation({ args: { id: v.optional(v.id("insurancePolicies"))
       (fields as Record<string, unknown>)[key] = value.trim();
     }
   }
-  if (!fields.policyNumber) throw new ConvexError("Add the policy number before saving.");
+  const essentialError = Object.values(essentialErrors(fields))[0];
+  if (essentialError) throw new ConvexError(essentialError);
+  fields.claimContactPhone = contactPhone(fields.claimContactPhone!)!.number;
   if ([fields.startDate, fields.endDate].some(date => date && !validDate(date))) throw new ConvexError("Check the coverage dates against your policy.");
   if (fields.startDate && fields.endDate && fields.endDate < fields.startDate) throw new ConvexError("The end date must be after the start date.");
   if (fields.sumAssured && (!Number.isFinite(Number(fields.sumAssured)) || Number(fields.sumAssured) <= 0 || Number(fields.sumAssured) > 1e12)) throw new ConvexError("Enter a positive coverage amount.");

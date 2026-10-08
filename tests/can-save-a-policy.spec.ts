@@ -1,16 +1,18 @@
 import {test,expect} from '@playwright/test';
-import {readFileSync} from 'node:fs';
+import {readFileSync,mkdirSync} from 'node:fs';
+import {fillRequiredPolicy} from './policy-input';
+import {captureViewport} from './ux-captures';
 const password='Kosh-demo-password-2026';
 
 test('can download before signup, save multiple policies and reopen changes',async({page,browser})=>{
- test.setTimeout(120000);const email=`kosh-owner-${Date.now()}@example.com`;const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
+ test.setTimeout(180000);mkdirSync('.impeccable/review',{recursive:true});const email=`kosh-owner-${Date.now()}@example.com`;const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');await page.getByRole('button',{name:'Start with one policy',exact:true}).click();
- await expect(page.locator('form input, form select, form textarea')).toHaveCount(6);
+ await fillRequiredPolicy(page);
  await page.getByLabel('Policy number',{exact:true}).fill('DEMO-LIFE-001');
  await page.getByLabel('Coverage end date',{exact:true}).fill('2028-10-06');
  await page.getByLabel('Where the hard or soft copy is kept',{exact:true}).fill('Blue folder');
  await page.getByLabel('Coverage amount (₹)',{exact:true}).fill('1000000');
- await page.getByLabel('Agent number or customer care details',{exact:true}).fill('Demo agent +91 00000 00000');
+ await expect(page.getByLabel('Contact name',{exact:true})).toHaveValue('Demo claims team');
  await page.setViewportSize({width:390,height:844});await page.screenshot({path:'verification/short-form-mobile.png',fullPage:true});
  await page.getByRole('button',{name:'Share policy',exact:true}).click();await expect(page.getByRole('heading',{name:'Share policy',exact:true})).toBeVisible();await expect(page.getByRole('article')).toContainText('DEMO-LIFE-001');await expect(page.getByText('Not saved to your account',{exact:true})).toBeVisible();
  await expect(page.getByRole('button',{name:'Download PDF',exact:true})).toBeVisible();
@@ -19,8 +21,23 @@ test('can download before signup, save multiple policies and reopen changes',asy
  await expect(page.getByRole('article')).toContainText('For my family');await expect(page.getByRole('heading',{name:'How to start a claim',exact:true})).toBeVisible();await expect(page.getByRole('heading',{name:'Submit the claim and keep a record',exact:true})).toBeVisible();
  await page.screenshot({path:'verification/family-note-mobile.png',fullPage:true});await page.setViewportSize({width:1280,height:900});await page.screenshot({path:'verification/family-note-desktop.png',fullPage:true});
  await page.getByRole('button',{name:'Create private link',exact:true}).click();await page.getByLabel('Email address',{exact:true}).fill(email);await page.getByLabel('Password',{exact:true}).fill(password);await page.getByRole('button',{name:'Create account',exact:true}).click();await expect(page.getByRole('button',{name:'Create family invitation',exact:true})).toBeVisible({timeout:30000});await expect(page.getByRole('button',{name:'Download PDF',exact:true})).toBeVisible();const savedCopy=page.waitForEvent('download');await page.getByRole('button',{name:'Download PDF',exact:true}).click();await (await savedCopy).saveAs('verification/saved-policy.pdf');expect(readFileSync('verification/saved-policy.pdf').subarray(0,4).toString()).toBe('%PDF');
- await page.getByRole('button',{name:'Back to policy',exact:true}).click();await expect(page.getByRole('article')).toContainText('Blue folder');await page.getByRole('button',{name:'Back to policies',exact:true}).click();
- await page.getByRole('button',{name:'Add a policy',exact:true}).click();await page.getByLabel('Insurance type',{exact:true}).selectOption('Health insurance');await page.getByLabel('Policy number',{exact:true}).fill('DEMO-HEALTH-002');await page.getByRole('button',{name:'Share policy',exact:true}).click();await page.getByRole('button',{name:'Create private link',exact:true}).click();await expect(page.getByRole('button',{name:'Create family invitation',exact:true})).toBeVisible();await page.getByRole('button',{name:'Back to policy',exact:true}).click();await page.getByRole('button',{name:'Back to policies',exact:true}).click();await expect(page.getByRole('button',{name:/DEMO-LIFE-001/})).toBeVisible();await expect(page.getByRole('button',{name:/DEMO-HEALTH-002/})).toBeVisible();
+ await page.getByRole('button',{name:'Back to policy',exact:true}).click();await expect(page.getByRole('article')).toContainText('Blue folder');
+ await page.getByRole('checkbox',{name:'Remind me to review every three months',exact:true}).check();
+ await expect(page.getByText(/^Next review:/)).toBeVisible();
+ await page.reload();await expect(page.getByRole('checkbox',{name:'Remind me to review every three months',exact:true})).toBeChecked();
+ await page.getByRole('button',{name:'I’ve checked these details',exact:true}).click();
+ await expect(page.getByRole('status')).toContainText('Review recorded');
+ await captureViewport(page,'ux-reminder-desktop',1440,900);
+ await captureViewport(page,'ux-reminder-mobile',390,844);
+ await page.getByRole('link',{name:'Home',exact:true}).click();
+ await expect(page.getByRole('button',{name:'Add another policy',exact:true})).toBeVisible();
+ await expect(page.getByRole('button',{name:'Start with one policy',exact:true})).toHaveCount(0);
+ await page.getByText('What to check, including SBI and RuPay',{exact:true}).click();
+ await expect(page.getByRole('link',{name:'SBI debit-card insurance',exact:true})).toHaveAttribute('href',/^https:\/\/sbi\.bank\.in/);
+ await captureViewport(page,'ux-home-desktop',1440,900);
+ await captureViewport(page,'ux-home-mobile',390,844);
+ await page.getByRole('link',{name:'My policies',exact:true}).click();
+ await page.getByRole('button',{name:'Add another policy',exact:true}).click();await expect(page.getByLabel('Policy number',{exact:true})).toHaveValue('');await fillRequiredPolicy(page,'Demo Health Insurance');await page.getByLabel('Insurance type',{exact:true}).selectOption('Health insurance');await page.getByLabel('Policy number',{exact:true}).fill('DEMO-HEALTH-002');await captureViewport(page,'ux-editor-desktop',1440,900);await captureViewport(page,'ux-editor-mobile',390,844);await page.getByRole('button',{name:'Share policy',exact:true}).click();await page.getByRole('button',{name:'Create private link',exact:true}).click();await expect(page.getByRole('button',{name:'Create family invitation',exact:true})).toBeVisible();await page.getByRole('button',{name:'Back to policy',exact:true}).click();await page.getByRole('button',{name:'Back to policies',exact:true}).click();await expect(page.getByRole('button',{name:/DEMO-LIFE-001/})).toBeVisible();await expect(page.getByRole('button',{name:/DEMO-HEALTH-002/})).toBeVisible();
  await page.getByRole('button',{name:/DEMO-LIFE-001/}).click();await page.getByRole('button',{name:'Change policy details',exact:true}).click();await page.getByLabel('Where the hard or soft copy is kept',{exact:true}).fill('Updated blue folder');await page.getByRole('button',{name:'Save changes',exact:true}).click();await expect(page.getByRole('article')).toContainText('Updated blue folder');await page.reload();await expect(page.getByRole('article')).toContainText('Updated blue folder');
  const context=await browser.newContext({baseURL:new URL(page.url()).origin});const other=await context.newPage();await other.goto('/#screen=policies');await other.getByLabel('Email address',{exact:true}).fill(email);await other.getByLabel('Password',{exact:true}).fill(password);await other.getByRole('button',{name:'Sign in',exact:true}).click();await expect(other.getByRole('button',{name:/DEMO-LIFE-001/})).toBeVisible({timeout:30000});await expect(other.getByRole('button',{name:/DEMO-HEALTH-002/})).toBeVisible();await context.close();
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.screenshot({path:'verification/owner-mobile.png',fullPage:true});expect(errors).toEqual([]);

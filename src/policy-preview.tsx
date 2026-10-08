@@ -17,11 +17,11 @@ export function PolicyPreview({ policy, activeField, onDetails }: {
       <p className="note-intro">{familyIntro}</p>
       <dl>{note.facts.map(([label, value]) => {
         const text = label === 'Coverage amount' && invalidAmount ? 'Needs checking' : value.trim() || 'Not recorded';
-        return <div className="fact" data-active={Boolean(activeField) && activeField.startsWith(label)} key={label}>
+        return <div className="fact" data-active={Boolean(activeField) && (activeField.startsWith(label) || label === 'Insurer' && activeField === 'Insurance company')} key={label}>
           <dt>{label}</dt><dd className={text.startsWith('Not recorded') || text === 'Needs checking' ? 'missing' : undefined}>{text}</dd>
         </div>;
       })}</dl>
-      <section className="preview-contact" data-active={activeField === 'Agent number or customer care details'}>
+      <section className="preview-contact" data-active={activeField.startsWith('Contact ')}>
         <h3>Who to contact</h3>
         <p className={note.contact.trim() ? 'preserve' : 'missing'}>{note.contact.trim() || 'Not recorded'}</p>
       </section>

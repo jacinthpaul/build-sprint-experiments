@@ -3,6 +3,7 @@ import { ConvexHttpClient } from 'convex/browser';
 import { api } from '../convex/_generated/api';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { createInvitation, requestInvitation, approveInvitation } from './share-invitation';
+import { fillRequiredPolicy } from './policy-input';
 
 // Opt in because this test uses paid models. All accounts and policy facts are fictional.
 if (process.env.KOSH_TEST_VOICE_WAV) test.use({ launchOptions: { args: [
@@ -32,6 +33,7 @@ test('shared family AI cites current sources, translates, drafts, and keeps the 
   await page.goto('/');
   await page.getByRole('button', { name: 'Start with one policy', exact: true }).click();
   await page.getByLabel('Policy number', { exact: true }).fill('DEMO-AI-001');
+  await fillRequiredPolicy(page,'LIC');
   await page.getByLabel('Where the hard or soft copy is kept', { exact: true }).fill('Blue folder in the study');
   await page.getByLabel('Coverage amount', { exact: false }).fill('2500000');
   await page.getByRole('button', { name: 'Share policy', exact: true }).click();
@@ -59,6 +61,8 @@ test('shared family AI cites current sources, translates, drafts, and keeps the 
   await family.setViewportSize({ width: 390, height: 844 });
   await expect(family.getByRole('button', { name: 'What should I do first?', exact: true })).toBeEnabled({ timeout: 30000 });
   await family.getByRole('button', { name: 'Translate answer', exact: true }).click();
+  if (!await family.getByLabel('Insurer name', { exact: false }).isVisible()) await family.getByText('Insurer and claim situation', { exact: true }).click();
+  await expect(family.getByLabel('Insurer name', { exact: false })).toHaveValue('LIC');
   await family.getByLabel('Insurer name', { exact: false }).fill('LIC');
   await family.getByLabel('What happened?', { exact: false }).selectOption('Death');
   const client = await clientFor(family), owner = await clientFor(page);
@@ -84,7 +88,7 @@ test('shared family AI cites current sources, translates, drafts, and keeps the 
   expect(translation.text).toMatch(/[\u0c00-\u0c7f]/); expect(translation.text).toContain('DEMO-AI-001');
   expect(translation.text.replace(/[,\s]/g, '')).toContain('2500000'); expect(translation.searched).toBe(false);
   console.log('Checking escalation draft uses missing-fact placeholders...');
-  await family.getByLabel('Insurer name', { exact: false }).fill('LIC');
+  await expect(family.getByLabel('Insurer name', { exact: false })).toHaveValue('LIC');
   await family.getByLabel('Your question', { exact: true }).fill('Draft a polite escalation asking for the status of my claim. I have not supplied any dates, claim reference or prior contacts. Use placeholders for missing facts. Do not send it.');
   await family.getByRole('button', { name: 'Draft an escalation', exact: true }).click();
   await expect.poll(async () => { const h = await conversation(); return !h?.busy ? h?.messages.filter(m => m.role === 'assistant').length : 0; }, { timeout: 120000 }).toBe(3);

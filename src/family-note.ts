@@ -6,7 +6,7 @@ export const familyCaution = 'These are general starting steps, not confirmation
 // The web note and its downloadable copy use the same saved facts and starting steps.
 export function familyNote(p:Policy){
  const facts=[
-  ...(p.insurer?[['Insurer',p.insurer]]:[]),
+  ['Insurer',p.insurer||'Not recorded — check the policy'],
   ['Insurance type',p.policyType],['Policy number',p.policyNumber],
   ...(p.nominee?[['Recorded nominee',p.nominee]]:[]),
   ['Coverage end date',p.endDate||'Not recorded — check the policy'],
