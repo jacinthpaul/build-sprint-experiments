@@ -24,12 +24,12 @@ export function FamilyAssistant({ policyId, savedInsurer, demo = false }: { poli
   const [insurer, setInsurer] = useState(savedInsurer), [country, setCountry] = useState('India');
   const [situation, setSituation] = useState<Situation>('Not sure yet'), [language, setLanguage] = useState<Language>('English');
   const [question, setQuestion] = useState(''), [busy, setBusy] = useState(false), [error, setError] = useState(''), [copied, setCopied] = useState('');
-  const [recording, setRecording] = useState(false), [converting, setConverting] = useState(false), [speaking, setSpeaking] = useState('');
+  const [startingVoice, setStartingVoice] = useState(false), [recording, setRecording] = useState(false), [converting, setConverting] = useState(false), [speaking, setSpeaking] = useState('');
   const recorder = useRef<Awaited<ReturnType<typeof recordQuestion>> | null>(null), mounted = useRef(false);
   const reader = useRef<SpeechSynthesisUtterance | null>(null);
   const [expanded, setExpanded] = useState(false), [choosingLanguage, setChoosingLanguage] = useState(false);
   const questionInput = useRef<HTMLTextAreaElement | null>(null), languageInput = useRef<HTMLSelectElement | null>(null);
-  const canAsk = (demo || available === true) && !busy && !history?.busy && !recording && !converting;
+  const canAsk = (demo || available === true) && !busy && !history?.busy && !startingVoice && !recording && !converting;
   useEffect(() => {
     mounted.current = true;
     if (!demo && policyId) availability({ policyId }).then(value => { if (mounted.current) setAvailable(value); }).catch(() => { if (mounted.current) { setAvailable(false); setError('AI availability could not be checked. Try again.'); } });
@@ -58,7 +58,7 @@ export function FamilyAssistant({ policyId, savedInsurer, demo = false }: { poli
   async function startVoice() {
     if (!canAsk || demo || !policyId) return;
     setExpanded(true);
-    setError(''); setRecording(true);
+    setError(''); setStartingVoice(true);
     try {
       recorder.current = await recordQuestion(async audio => {
         if (!mounted.current) return;
@@ -70,7 +70,9 @@ export function FamilyAssistant({ policyId, savedInsurer, demo = false }: { poli
         finally { if (mounted.current) setConverting(false); }
       }, () => { if (mounted.current) { setRecording(false); setError('Recording failed. Type your question instead.'); } });
       if (!mounted.current) recorder.current.cancel();
+      else setRecording(true);
     } catch { if (mounted.current) { setRecording(false); setError('Microphone access is unavailable. Allow it in your browser settings or type your question.'); } }
+    finally { if (mounted.current) setStartingVoice(false); }
   }
   function readAnswer(id: string, text: string) {
     if (!window.speechSynthesis) { setError('Reading aloud is not supported on this device. The full answer is shown above.'); return; }
@@ -98,8 +100,8 @@ export function FamilyAssistant({ policyId, savedInsurer, demo = false }: { poli
       <button className="primary ai-feature" aria-label="Ask Kosh" disabled={demo || !canAsk} onClick={() => send('question',question.trim() || 'Explain the saved details of this policy in plain language and help me understand what to do first. Keep missing information clear and do not assume coverage or a payout.')}>
         <HelpIcon/><span><strong>Ask Kosh</strong><span>AI explains your policy and next steps.</span></span>
       </button>
-      <button className="secondary ai-feature" aria-label={recording?'Stop recording':converting?'Turning speech into text…':'Speak your question'} disabled={demo || (!recording && (!canAsk || converting))} onClick={recording ? () => recorder.current?.stop() : startVoice}>
-        <HelpIcon voice/><span><strong>{recording?'Stop recording':converting?'Transcribing…':'Speak your question'}</strong><span>Voice help. Check the words before sending.</span></span>
+      <button className="secondary ai-feature" aria-label={recording?'Stop recording':startingVoice?'Starting microphone…':converting?'Turning speech into text…':'Speak your question'} disabled={demo || (!recording && (!canAsk || converting))} onClick={recording ? () => recorder.current?.stop() : startVoice}>
+        <HelpIcon voice/><span><strong>{recording?'Stop recording':startingVoice?'Starting microphone…':converting?'Transcribing…':'Speak your question'}</strong><span>Voice help. Check the words before sending.</span></span>
       </button>
     </div>
     {recording && <p role="status">Recording, up to 30 seconds. Tap Stop recording when you're ready.</p>}
