@@ -16,6 +16,7 @@ import type * as http from "../http.js";
 import type * as insurance from "../insurance.js";
 import type * as insuranceFields from "../insuranceFields.js";
 import type * as invitations from "../invitations.js";
+import type * as keepKosh from "../keepKosh.js";
 import type * as policies from "../policies.js";
 import type * as reviewReminders from "../reviewReminders.js";
 import type * as shares from "../shares.js";
@@ -35,6 +36,7 @@ declare const fullApi: ApiFromModules<{
   insurance: typeof insurance;
   insuranceFields: typeof insuranceFields;
   invitations: typeof invitations;
+  keepKosh: typeof keepKosh;
   policies: typeof policies;
   reviewReminders: typeof reviewReminders;
   shares: typeof shares;

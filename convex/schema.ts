@@ -7,6 +7,8 @@ export const optionalFields = { firstAction: v.optional(v.string()), guideSource
 export const policyFields = { insurer: v.string(), policyNumber: v.string(), policyType, nominee: v.string(), paperLocation: v.string(), ...optionalFields };
 export default defineSchema({
  ...authTables,
+ keepKoshRequests: defineTable({ userId: v.id("users"), tappedAt: v.number() }).index("by_user", ["userId"]),
+ keepKoshTotals: defineTable({ key: v.literal("all"), users: v.number() }).index("by_key", ["key"]),
  familyAiThreads: defineTable({ policyId: v.id("insurancePolicies"), userId: v.id("users"), threadId: v.string(), activeUntil: v.number(), requestId: v.string(), day: v.string(), requests: v.number() }).index("by_policy_user", ["policyId", "userId"]),
  familyAiUsage: defineTable({ key: v.string(), day: v.string(), requests: v.number() }).index("by_key_day", ["key", "day"]),
  familyAiSources: defineTable({ threadId: v.string(), messageId: v.string(), checkedAt: v.number(), searched: v.boolean(), sources: v.array(v.object({ url: v.string(), title: v.string() })) }).index("by_thread", ["threadId"]),
