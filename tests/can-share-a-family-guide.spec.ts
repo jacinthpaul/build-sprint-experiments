@@ -123,7 +123,7 @@ test('sender creates an invitation, confirms the right account, and revoked acce
   await expect(outsiderClient.mutation(api.invitations.requestAccess,{token:cancelledToken})).rejects.toThrow(/unavailable/);
   await family.evaluate(()=>document.fonts.ready);expect(await family.evaluate(()=>document.fonts.check('16px "Noto Sans"'))).toBe(true);
   expect(await family.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await family.screenshot({path:'verification/family-guide-mobile.png',fullPage:true});
-  await family.getByText('What to check, including SBI and RuPay',{exact:true}).click();
+  await family.getByText('Where to look for hidden cover',{exact:true}).click();
   await captureViewport(family,'ux-family-mobile',390,844);
   await captureViewport(family,'ux-family-desktop',1440,900);
   await page.getByRole('button',{name:'Remove access for Demo Family Member',exact:true}).click();

@@ -1,16 +1,28 @@
 export function BankCoverNotice() {
  return <section className="bank-cover-notice" aria-labelledby="bank-cover-title">
-  <h2 id="bank-cover-title">Insurance you may have through your bank</h2>
-  <p>Some ATM or debit cards and bank-account packages include insurance. Check with your bank so your family knows whether there is another policy to look for.</p>
-  <details><summary>What to check, including SBI and RuPay</summary>
-   <ul>
-    <li>Ask about your exact card or account package, the insurer and any policy or certificate reference.</li>
-    <li>Confirm what is covered, whether cover is active, any card-use or enrolment conditions, and how to notify a claim.</li>
-    <li>Get the current claim contact and written terms. Add the confirmed insurance details to Kosh.</li>
-   </ul>
-   <p>Accident cover may not cover natural death. Owning a card or account alone does not confirm eligibility.</p>
-   <p className="bank-cover-sources">Official information: <a href="https://sbi.bank.in/web/personal-banking/cards/debit-card/insurance-covers-available" target="_blank" rel="noreferrer">SBI debit-card insurance</a> · <a href="https://sbi.bank.in/web/salary-account/central-government-salary-package" target="_blank" rel="noreferrer">An SBI salary-account example</a> · <a href="https://www.npci.org.in/what-we-do/rupay/circulars" target="_blank" rel="noreferrer">RuPay insurance circulars</a></p>
-   <p className="muted">Links checked on 8 October 2026. Use the terms that apply to the event date. Keep card numbers, PINs and CVVs out of Kosh.</p>
-  </details>
+  <div className="bank-tip-heading">
+   <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M9 18h6m-5 3h4M8 14a6 6 0 1 1 8 0c-1.3 1-1 2-1 2H9s.3-1-1-2Z"/></svg>
+   <h2 id="bank-cover-title">Did you know?</h2>
+  </div>
+  <div className="bank-tip-content">
+   <div className="bank-tip-intro">
+    <p className="bank-tip-lead">You may have more insurance than you realise.</p>
+    <p>Cover can come with things you already use, like a bank card, salary account or benefits at work. It is easy to leave these out of your family's records.</p>
+    <p className="bank-tip-fact">A <a href="https://www.pib.gov.in/PressReleasePage.aspx?PRID=2244475" target="_blank" rel="noreferrer">government update</a> reported nearly <strong>₹9,000 crore</strong> in unclaimed insurance money as of 28 February 2026.</p>
+   </div>
+   <div className="bank-tip-discovery">
+    <p>For example, eligible <a href="https://sbi.bank.in/web/personal-banking/cards/debit-card/insurance-covers-available" target="_blank" rel="noreferrer">SBI debit cards</a> include insurance. Ask your bank what comes with your own card or account.</p>
+    <details><summary>Where to look for hidden cover</summary>
+     <ul>
+      <li><strong>ATM, debit and credit cards</strong><span>Check the benefits of each card you hold.</span></li>
+      <li><strong>Bank and salary accounts</strong><span>Ask about insurance included in your account package.</span></li>
+      <li><strong>Benefits at work</strong><span>Ask HR about group life, health or accident cover.</span></li>
+      <li><strong>Home, car and other loans</strong><span>Check your loan papers for insurance you took with the loan.</span></li>
+      <li><strong>Schemes joined through your bank</strong><span>Look for insurance enrolments and premium deductions in your statements.</span></li>
+     </ul>
+     <p className="bank-tip-next">Found another policy? Confirm its details with the provider, then add it to Kosh for your family.</p>
+    </details>
+   </div>
+  </div>
  </section>;
 }

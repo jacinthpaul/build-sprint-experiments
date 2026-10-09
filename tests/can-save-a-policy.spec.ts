@@ -32,8 +32,8 @@ test('can download before signup, save multiple policies and reopen changes',asy
  await page.getByRole('link',{name:'Home',exact:true}).click();
  await expect(page.getByRole('button',{name:'Add another policy',exact:true})).toBeVisible();
  await expect(page.getByRole('button',{name:'Start with one policy',exact:true})).toHaveCount(0);
- await page.getByText('What to check, including SBI and RuPay',{exact:true}).click();
- await expect(page.getByRole('link',{name:'SBI debit-card insurance',exact:true})).toHaveAttribute('href',/^https:\/\/sbi\.bank\.in/);
+ await page.getByText('Where to look for hidden cover',{exact:true}).click();
+ await expect(page.getByRole('link',{name:'SBI debit cards',exact:true})).toHaveAttribute('href',/^https:\/\/sbi\.bank\.in/);
  await captureViewport(page,'ux-home-desktop',1440,900);
  await captureViewport(page,'ux-home-mobile',390,844);
  await page.getByRole('link',{name:'My policies',exact:true}).click();

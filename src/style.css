@@ -52,11 +52,25 @@
 .home-shell .app-nav{max-width:1040px;padding-inline:24px}
 .editor-shell .app-nav{max-width:1160px}
 .draft-choice .text-button{display:block;margin-top:20px}
-.bank-cover-notice{margin-top:32px;padding-top:28px;border-top:1px solid var(--border);grid-column:1/-1}
-.bank-cover-notice>p{max-width:70ch}
-.bank-cover-notice summary{min-height:48px;padding:12px 0;cursor:pointer;text-decoration:underline;text-underline-offset:4px}
-.bank-cover-notice details p,.bank-cover-notice ul{margin-top:20px}
-.bank-cover-sources{line-height:1.8}
+.bank-cover-notice{margin-top:32px;padding:28px;background:#edf3f8;border:1px solid var(--border);border-radius:16px;grid-column:1/-1;min-width:0}
+.bank-tip-heading{display:flex;align-items:center;gap:12px;margin-bottom:24px}
+.bank-tip-heading svg{flex-shrink:0}
+.bank-tip-heading h2{font-size:24px;line-height:1.3;margin:0;letter-spacing:-.02em}
+.bank-tip-content{display:grid;gap:24px}
+.bank-tip-content>div{min-width:0}
+.bank-tip-lead{font-size:20px;font-weight:700;line-height:1.4;margin-bottom:12px}
+.bank-tip-intro p:last-child{margin-bottom:0}
+.bank-tip-fact{padding-top:20px;border-top:1px solid var(--border)}
+.bank-tip-discovery>p{margin-bottom:16px}
+.bank-cover-notice summary{min-height:48px;padding:12px 0;cursor:pointer;text-decoration:underline;text-underline-offset:4px;font-weight:700}
+.bank-cover-notice summary:hover{color:var(--muted)}
+.bank-cover-notice ul{list-style:none;margin:8px 0 0;padding:0}
+.bank-cover-notice li{padding:16px 0;border-top:1px solid var(--border)}
+.bank-cover-notice li strong,.bank-cover-notice li span{display:block}
+.bank-cover-notice li span{margin-top:4px}
+.bank-tip-next{padding-top:20px;border-top:1px solid var(--border);margin:0}
+@media(min-width:800px){.bank-cover-notice{padding:32px}.bank-tip-content{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:32px}.bank-tip-discovery{padding-left:32px;border-left:1px solid var(--border)}}
+@media(max-width:600px){.bank-cover-notice{padding:24px 20px}.bank-tip-discovery{padding-top:24px;border-top:1px solid var(--border)}}
 .policy-review-reminder{margin-top:40px;padding-top:28px;border-top:1px solid var(--border)}
 .review-option{display:flex;flex-direction:row;align-items:flex-start;gap:12px;margin:24px 0 16px;cursor:pointer}
 .review-option input{width:20px;min-height:20px;flex-shrink:0;margin:4px 0 0;accent-color:var(--accent)}
