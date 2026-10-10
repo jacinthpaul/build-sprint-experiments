@@ -17,6 +17,7 @@
 .home-return{grid-area:return;display:grid;gap:20px;border-top:1px solid var(--border);padding-top:24px}
 .home-return .text-button{font-weight:700;line-height:1.5}
 .home-return p{margin:4px 0 0;max-width:58ch;line-height:1.5}
+.home-return>.keep-kosh{grid-column:1/-1;margin-top:0}
 .home-note-preview{grid-area:note;background:#edf3f8;padding:28px;border-radius:16px}
 .home-note-preview h2{font-size:28px;line-height:1.3;font-weight:400;letter-spacing:-.02em;margin-bottom:16px}
 .home-note-preview>p{margin-bottom:24px;max-width:28ch}

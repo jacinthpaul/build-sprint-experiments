@@ -1,5 +1,6 @@
 import React from 'react';
 import {BankCoverNotice} from './bank-cover-notice';
+import {KeepKosh} from './keep-kosh';
 
 export function HomeScreen({onStart,onSaved,onFamily,onDemo,onContinue,hasDraft=false,policyCount=0,loading=false,dueReviews=0}:{onStart:()=>void;onSaved:()=>void;onFamily:()=>void;onDemo:()=>void;onContinue:()=>void;hasDraft?:boolean;policyCount?:number;loading?:boolean;dueReviews?:number}){
  return <div className="home-content">
@@ -20,6 +21,7 @@ export function HomeScreen({onStart,onSaved,onFamily,onDemo,onContinue,hasDraft=
     <button className="text-button" onClick={onFamily} aria-describedby="shared-information-help">Open information shared with me</button>
     <p id="shared-information-help" className="muted">Use this when someone has shared their insurance with you. Open their policy, ask Kosh for help, or speak your question.</p>
    </section>
+   <KeepKosh onSignIn={onSaved}/>
   </div>
   <aside className="home-note-preview" aria-label="Preview of a family note">
    <h2>For my family</h2>
