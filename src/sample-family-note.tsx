@@ -6,17 +6,17 @@ export function SampleFamilyNote() {
     <span className="sample-chip">Sample</span>
     <header className="sample-note-header">
       <p className="metadata">Shared with you</p>
-      <h2>Term life · Example Life Insurance</h2>
+      <h2>Health insurance · Example Health Insurance</h2>
       <p className="metadata">Last checked 4 Oct</p>
     </header>
     <section className="first-action">
       <p className="first-action-label">Do this first</p>
-      <p>Call the insurer to register the claim. Keep the policy number ready.</p>
+      <p>Call the insurer about the hospital claim. Keep the policy number ready.</p>
       <span className="sample-call"><Phone size={20} aria-hidden="true"/>Call insurer</span>
     </section>
     <dl className="sample-documents">
-      <div><dt>Death certificate</dt><dd><StatusChip variant="missing"/></dd></div>
-      <div><dt>Nominee ID</dt><dd><StatusChip variant="needs-checking"/></dd></div>
+      <div><dt>Hospital bills</dt><dd><StatusChip variant="missing"/></dd></div>
+      <div><dt>Patient ID</dt><dd><StatusChip variant="needs-checking"/></dd></div>
       <div><dt>Policy document</dt><dd><StatusChip variant="found"/><span className="metadata">Blue folder</span></dd></div>
     </dl>
   </aside>;
