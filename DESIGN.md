@@ -9,6 +9,9 @@ Read this before building or changing any screen. If a choice isn't covered here
 - **Policy fact rows:** Labels sit beside values on larger screens and above them on phones.
 - **Visible gaps:** “Missing” or “Needs checking” sits beside the affected detail.
 - **Main button:** One filled button per screen state; secondary actions use underlined text.
+- **Warm paper:** Pages sit on a warm off-white background; content sits on white cards, like a note on paper.
+- **Status shapes:** Every status has a colour AND a shape or icon: dashed outline for Missing, filled amber chip for Needs checking, teal chip with a tick for Found/Checked.
+- **Show, don't list:** The landing page shows a sample family note instead of a list of features.
 
 ## 2\. References, one per component
 
@@ -28,35 +31,47 @@ Ignore: Asking every possible question before showing useful information.
 Take: A clear explanation at the top, links to affected fields, and a specific message beside each field.  
 Ignore: Copying its colours or dimensions without fitting Kosh’s design.
 
-**Main button:** Reference to choose before building.
-Take: To be agreed from the selected component reference; keep one filled main action per screen state.
-Ignore: Unrelated branding and surrounding page content.
+**Main button:** Filled `--primary`, white 16px text, min height 48px, 10px radius, full width on phones. Optional leading icon only when it names the action (e.g. phone icon on "Call [insurer]").
 
-**Policy list:** Reference to choose before building.
-Take: To be agreed from the selected component reference; keep insurance type, insurer, and who or what is covered easy to compare.
-Ignore: Unrelated dashboard features and decorative metrics.
+**Policy list:** White cards, one per policy: insurance-type icon in a 40px `--primary-soft` circle, insurer + type as title, who/what is covered as subtitle, status chip and last-checked date on the right (stacked under on phones).
 
-**First-action block:** Reference to choose before building.
-Take: To be agreed from the selected component reference; keep the first action and checked contact together above supporting details.
-Ignore: Promotional copy and claims of guaranteed outcomes.
+**First-action block:** White card, 4px `--primary` left bar, small "Do this first" label in `--primary`, action sentence at 17px, main button inside the card.
 
-**Sharing controls:** Reference to choose before building.
-Take: To be agreed from the selected component reference; make the recipient, information shared, and existing access explicit.
-Ignore: Social feeds, public sharing, and unrelated collaboration features.
+**Sharing controls:** List of people with access as rows: name, what they can view, Remove access as an underlined secondary link. Recipient form sits above in its own card.
 
 ## 3\. Type and colour
 
-**Font:** Noto Sans, loaded with the app, for headings, policy details, forms, guidance, and buttons on every device. Check the loaded font on the family page on a phone before calling it verified.
+**Fonts:** Noto Serif (600) for the opening headline and screen titles only. Noto Sans for everything else. Both load with the app. Check both on the family page on a phone before calling it verified.
 
 **Sizes:**
 
-- 32px: Opening headline.
-- 24px: Screen titles.
+- 40px: Opening headline on desktop; 30px on phones.
+- 28px: Screen titles (24px on phones).
 - 20px: Section headings.
-- 16px: Body text, field labels, buttons, sources, and status messages.
+- 17px: Body text on desktop; 16px on phones.
+- 16px: Field labels, buttons, status messages.
+- 14px: Sources, chips, metadata. Nothing smaller.
 
-**Colours:**  
-Text `#1C3449` on white `#FFFFFF`; outer page background `#EDF3F8`. Secondary text `#526578`. Accent `#234B70`, with white text, only on the main action. Errors `#B42318`. Borders `#CBD5DF`.
+**Colours:**
+
+| Token | Hex | Use |
+|---|---|---|
+| `--page-bg` | `#FAF6EF` | Outer page background (warm paper) |
+| `--surface` | `#FFFFFF` | Cards, forms, panels |
+| `--surface-soft` | `#F3EEE4` | Secondary panels (e.g. "Did you know"), hover |
+| `--text` | `#1F2A30` | Body and headings |
+| `--text-secondary` | `#5B6770` | Supporting text (never lighter than this) |
+| `--border` | `#E2DACB` | Card borders and dividers |
+| `--primary` | `#0F5257` | Main button, first-action bar, links on hover. White text on it. |
+| `--primary-hover` | `#0B4145` | Main button hover |
+| `--primary-soft` | `#E3EFEC` | Found/Checked chip background, selected rows |
+| `--warning` | `#B45309` | Needs checking text |
+| `--warning-soft` | `#FDF1DC` | Needs checking chip background |
+| `--error` | `#B42318` | Missing and error text, dashed Missing outline |
+| `--error-soft` | `#FDECEA` | Error summary background |
+| `--focus` | `#0F5257` | 3px focus ring with 2px offset |
+
+Teal (`--primary`) is used only for the one main action per screen and the first-action block. Everything else stays neutral.
 
 Missing information uses a written label and border rather than colour alone. Links remain underlined.
 
@@ -65,7 +80,10 @@ Missing information uses a written label and border rather than colour alone. Li
 - Body text: 16px with 1.5 line spacing.
 - Headings: bold; body text: regular.
 - Use spacing and weight before adding another text size.
-- Buttons and inputs: 8px corner radius.
+- Buttons and inputs: 10px corner radius. Cards and panels: 14px. Chips: 6px.
+- Cards use a 1px `--border` and no shadow, or at most `0 1px 2px rgba(31,42,48,0.06)`.
+- First-action block: white card with a 4px `--primary` left bar (square corners on the bar side).
+- Content max width: 1080px on desktop, centred, with 24px side padding (16px on phones).
 - Keep policy numbers readable without cutting off their characters; wrap long values within the phone width.
 
 ## 4. Screens
@@ -226,3 +244,5 @@ Start with one policy
 - Every borrowed component follows Kosh’s fonts, colours, and spacing.
 - Treat new AI-written screen words as drafts for my review.
 - Keep lasting design rules here; remove outdated or conflicting instructions.
+- Icons: one line-icon set (Lucide), 20–24px, outline only, used for insurance types, statuses and secondary actions. No illustrations of people, hospitals, or anything distressing.
+- Never rely on colour alone for status; always pair with a written label and shape/icon.

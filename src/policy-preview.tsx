@@ -1,5 +1,6 @@
 import { familyIntro, familyNote } from './family-note';
 import type { Policy } from './policy';
+import { StatusValue } from './status-chip';
 
 export function PolicyPreview({ policy, activeField, onDetails }: {
   policy: Policy; activeField: string; onDetails: () => void;
@@ -18,12 +19,12 @@ export function PolicyPreview({ policy, activeField, onDetails }: {
       <dl>{note.facts.map(([label, value]) => {
         const text = label === 'Coverage amount' && invalidAmount ? 'Needs checking' : value.trim() || 'Not recorded';
         return <div className="fact" data-active={Boolean(activeField) && (activeField.startsWith(label) || label === 'Insurer' && activeField === 'Insurance company')} key={label}>
-          <dt>{label}</dt><dd className={text.startsWith('Not recorded') || text === 'Needs checking' ? 'missing' : undefined}>{text}</dd>
+          <dt>{label}</dt><dd><StatusValue value={text}/></dd>
         </div>;
       })}</dl>
       <section className="preview-contact" data-active={activeField.startsWith('Contact ')}>
         <h3>Who to contact</h3>
-        <p className={note.contact.trim() ? 'preserve' : 'missing'}>{note.contact.trim() || 'Not recorded'}</p>
+        <p className="preserve"><StatusValue value={note.contact.trim() || 'Not recorded'}/></p>
       </section>
       <p className="preview-caution muted">Confirm coverage and claim requirements with the insurer.</p>
     </article>

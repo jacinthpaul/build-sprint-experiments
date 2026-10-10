@@ -1,7 +1,9 @@
+import { Lightbulb } from 'lucide-react';
+
 export function BankCoverNotice() {
  return <section className="bank-cover-notice" aria-labelledby="bank-cover-title">
   <div className="bank-tip-heading">
-   <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M9 18h6m-5 3h4M8 14a6 6 0 1 1 8 0c-1.3 1-1 2-1 2H9s.3-1-1-2Z"/></svg>
+   <Lightbulb size={24} aria-hidden="true"/>
    <h2 id="bank-cover-title">Did you know?</h2>
   </div>
   <div className="bank-tip-content">

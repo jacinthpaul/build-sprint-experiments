@@ -5,15 +5,15 @@ import type { Id } from '../convex/_generated/dataModel';
 import { recordQuestion } from './voice';
 import { message } from './common';
 import { exampleFirstStep, exampleEscalation, exampleTelugu } from './sample-family';
+import { MessageCircle, Mic } from 'lucide-react';
 
 const languageCodes = { English: 'en-IN', Hindi: 'hi-IN', Telugu: 'te-IN', Tamil: 'ta-IN', Malayalam: 'ml-IN', Kannada: 'kn-IN', Marathi: 'mr-IN', Bengali: 'bn-IN' };
 type Language = keyof typeof languageCodes;
 type Mode = 'next' | 'latest' | 'draft' | 'translate' | 'question';
 type Situation = 'Not sure yet' | 'Death' | 'Accident' | 'Hospital treatment' | 'Loss or damage' | 'Travel problem';
 function HelpIcon({ voice = false }: { voice?: boolean }) {
-  return <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    {voice ? <><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11v1a7 7 0 0 0 14 0v-1M12 19v3M9 22h6"/></> : <><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5H4l-1 1v-9.5a8.5 8.5 0 0 1 17 0Z"/><path d="M7 10h9M7 14h6"/></>}
-  </svg>;
+  const Icon = voice ? Mic : MessageCircle;
+  return <Icon size={24} aria-hidden="true"/>;
 }
 export function FamilyAssistant({ policyId, savedInsurer, demo = false }: { policyId?: Id<'insurancePolicies'>; savedInsurer: string; demo?: boolean }) {
   const ask = useAction(api.familyAi.ask), availability = useAction(api.familyAi.availability), transcribe = useAction(api.familyAi.transcribe);

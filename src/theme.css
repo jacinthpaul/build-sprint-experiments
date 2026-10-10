@@ -1,0 +1,61 @@
+:root {
+  --page-bg: #FAF6EF;
+  --surface: #FFFFFF;
+  --surface-soft: #F3EEE4;
+  --text: #1F2A30;
+  --text-secondary: #5B6770;
+  --border: #E2DACB;
+  --primary: #0F5257;
+  --primary-hover: #0B4145;
+  --primary-soft: #E3EFEC;
+  --warning: #B45309;
+  --warning-soft: #FDF1DC;
+  --error: #B42318;
+  --error-soft: #FDECEA;
+  --focus: #0F5257;
+  --font-body: 'Noto Sans', sans-serif;
+  --font-title: 'Noto Serif', serif;
+  --size-opening: 40px;
+  --size-title: 28px;
+  --size-section: 20px;
+  --size-body: 17px;
+  --size-control: 16px;
+  --size-meta: 14px;
+  --weight-title: 600;
+  --weight-body: 400;
+  --weight-strong: 700;
+  --line-body: 1.6;
+  --line-heading: 1.3;
+  --radius-control: 10px;
+  --radius-card: 14px;
+  --radius-chip: 6px;
+  --radius-circle: 50%;
+  --content-width: 1080px;
+  --page-padding: 24px;
+  --card-padding: 28px;
+  --control-height: 48px;
+  --focus-width: 3px;
+  --focus-offset: 2px;
+  --first-action-bar: 4px;
+  --icon-size: 20px;
+  --icon-large: 24px;
+  --policy-icon-size: 40px;
+  --muted: var(--text-secondary);
+  --accent: var(--primary);
+  /* PDF values are points, independent of responsive screen type. */
+  --pdf-title-size: 26;
+  --pdf-section-size: 16;
+  --pdf-step-size: 12;
+  --pdf-body-size: 10.5;
+  --pdf-meta-size: 9;
+}
+
+@media (max-width: 600px) {
+  :root {
+    --size-opening: 30px;
+    --size-title: 24px;
+    --size-body: 16px;
+    --page-padding: 16px;
+    --card-padding: 20px;
+  }
+}

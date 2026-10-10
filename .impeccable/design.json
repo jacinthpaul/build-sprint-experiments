@@ -1,0 +1,139 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-10T12:32:10.848Z",
+  "title": "Design System: Kosh",
+  "extensions": {
+    "typographyMeta": {
+      "font-title": {
+        "displayName": "Noto Serif",
+        "purpose": "Opening headline and screen titles (h1) at weight 600. The landing line “Prepared by you. Kept for the people you love.” is the explicit 20px exception."
+      },
+      "font-body": {
+        "displayName": "Noto Sans",
+        "purpose": "All other screen text, including section headings, policy details, forms, buttons, chips, sources and metadata."
+      }
+    },
+    "shadows": [
+      {
+        "name": "card",
+        "value": "none",
+        "purpose": "Shared cards and panels use the border and surface tokens without a shadow."
+      }
+    ],
+    "motion": [
+      {
+        "name": "screen-motion",
+        "value": "none",
+        "purpose": "Shared screen styles declare no animations or transitions."
+      },
+      {
+        "name": "reduced-motion-scroll",
+        "value": "auto",
+        "purpose": "The reduced-motion media query sets scroll-behavior to auto."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "phone",
+        "value": "600px"
+      },
+      {
+        "name": "information-panel-columns",
+        "value": "800px"
+      },
+      {
+        "name": "hero-and-editor-columns",
+        "value": "900px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Main button",
+      "kind": "button",
+      "description": "One filled main action for the current screen state; full width at phone size.",
+      "html": "<button class=\"ds-primary\" type=\"button\">Start with one policy</button>",
+      "css": ".ds-primary,.ds-secondary{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:var(--control-height);max-width:100%;padding:12px 24px;border:1px solid transparent;border-radius:var(--radius-control);font-family:var(--font-body);font-size:var(--size-control);font-weight:var(--weight-strong);text-decoration:none;text-align:center;line-height:1.5;cursor:pointer}.ds-primary{background:var(--primary);color:var(--surface)}.ds-primary:hover:not(:disabled){background:var(--primary-hover);color:var(--surface)}.ds-primary:disabled{background:var(--surface-soft);color:var(--text-secondary);border-color:var(--border);cursor:default}.ds-secondary{border-color:var(--border);background:var(--surface);color:var(--text)}.ds-secondary:hover:not(:disabled){background:var(--surface-soft);color:var(--primary)}.ds-secondary:disabled{color:var(--text-secondary);cursor:default}.ds-primary:focus-visible{outline:var(--focus-width) solid var(--focus);outline-offset:var(--focus-offset)}.ds-secondary:focus-visible{outline:var(--focus-width) solid var(--focus);outline-offset:var(--focus-offset)}@media(max-width:600px){.ds-primary,.ds-secondary{width:100%}}"
+    },
+    {
+      "name": "Secondary button",
+      "kind": "button",
+      "description": "Neutral outlined action with the same height and corner radius as the main button.",
+      "html": "<button class=\"ds-secondary\" type=\"button\">Back to policies</button>",
+      "css": ".ds-primary,.ds-secondary{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:var(--control-height);max-width:100%;padding:12px 24px;border:1px solid transparent;border-radius:var(--radius-control);font-family:var(--font-body);font-size:var(--size-control);font-weight:var(--weight-strong);text-decoration:none;text-align:center;line-height:1.5;cursor:pointer}.ds-primary{background:var(--primary);color:var(--surface)}.ds-primary:hover:not(:disabled){background:var(--primary-hover);color:var(--surface)}.ds-primary:disabled{background:var(--surface-soft);color:var(--text-secondary);border-color:var(--border);cursor:default}.ds-secondary{border-color:var(--border);background:var(--surface);color:var(--text)}.ds-secondary:hover:not(:disabled){background:var(--surface-soft);color:var(--primary)}.ds-secondary:disabled{color:var(--text-secondary);cursor:default}.ds-primary:focus-visible{outline:var(--focus-width) solid var(--focus);outline-offset:var(--focus-offset)}.ds-secondary:focus-visible{outline:var(--focus-width) solid var(--focus);outline-offset:var(--focus-offset)}@media(max-width:600px){.ds-primary,.ds-secondary{width:100%}}"
+    },
+    {
+      "name": "Underlined action",
+      "kind": "button",
+      "description": "Secondary text action with a visible focus ring and a 48px minimum height.",
+      "html": "<button class=\"ds-text-action\" type=\"button\">See a sample family page</button>",
+      "css": ".ds-text-action{min-height:var(--control-height);border:0;background:transparent;color:var(--text);padding:8px 0;text-decoration:underline;text-underline-offset:4px;font-family:var(--font-body);font-size:var(--size-control);font-weight:var(--weight-body);text-align:left;line-height:1.5;cursor:pointer}.ds-text-action:hover:not(:disabled){color:var(--primary)}.ds-text-action:disabled{color:var(--text-secondary);cursor:default}.ds-text-action:focus-visible{outline:var(--focus-width) solid var(--focus);outline-offset:var(--focus-offset)}"
+    },
+    {
+      "name": "Labelled field",
+      "kind": "input",
+      "description": "White input with the shared control radius, 48px minimum height, and focus ring.",
+      "html": "<label class=\"ds-field\">Policy number<input class=\"ds-input\" type=\"text\" value=\"EXAMPLE-001\"></label>",
+      "css": ".ds-field{display:flex;flex-direction:column;gap:8px;font-family:var(--font-body);color:var(--text);font-size:var(--size-control);font-weight:var(--weight-strong);margin-bottom:24px}.ds-input{font-family:var(--font-body);font-size:var(--size-control);font-weight:var(--weight-body);line-height:var(--line-body);color:var(--text);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-control);min-height:var(--control-height);width:100%;min-width:0;padding:12px;caret-color:var(--primary)}.ds-input::placeholder{color:var(--text-secondary);opacity:1}.ds-input[aria-invalid=\"true\"]{border-color:var(--error)}.ds-input:focus-visible{outline:var(--focus-width) solid var(--focus);outline-offset:var(--focus-offset)}"
+    },
+    {
+      "name": "Main navigation",
+      "kind": "nav",
+      "description": "Underlined text links; the current page uses stronger text weight.",
+      "html": "<nav class=\"ds-nav\" aria-label=\"Main navigation\"><a href=\"#screen=start\" aria-current=\"page\">Home</a><a href=\"#screen=policies\">My policies</a><a href=\"#screen=family\">Shared with me</a></nav>",
+      "css": ".ds-nav{display:flex;flex-wrap:wrap;gap:8px 24px;padding-block:8px;border-bottom:1px solid var(--border);font-family:var(--font-body)}.ds-nav a{display:inline-flex;align-items:center;min-height:var(--control-height);color:var(--text);font-size:var(--size-control);line-height:var(--line-body);text-decoration:underline;text-underline-offset:4px}.ds-nav a:hover{color:var(--primary)}.ds-nav a[aria-current=\"page\"]{font-weight:var(--weight-strong)}.ds-nav a:focus-visible{outline:var(--focus-width) solid var(--focus);outline-offset:var(--focus-offset)}@media(max-width:600px){.ds-nav{gap:8px 20px}}"
+    },
+    {
+      "name": "Status chips",
+      "kind": "chip",
+      "description": "Shared missing, needs-checking and found variants pair written labels with outline icons and distinct shapes. Amber contrast remains pending.",
+      "html": "<div class=\"ds-chip-examples\"><span class=\"ds-chip ds-missing\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3\"/><path d=\"M12 17h.01\"/></svg><span>Missing</span></span><span class=\"ds-chip ds-needs-checking\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3\"/><path d=\"M12 9v4\"/><path d=\"M12 17h.01\"/></svg><span>Needs checking</span></span><span class=\"ds-chip ds-found\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M20 6 9 17l-5-5\"/></svg><span>Found</span></span></div>",
+      "css": ".ds-chip-examples{display:flex;flex-wrap:wrap;gap:12px}.ds-chip{display:inline-flex;align-items:flex-start;gap:6px;width:fit-content;max-width:100%;padding:5px 8px;border:1px solid transparent;border-radius:var(--radius-chip);font-family:var(--font-body);font-size:var(--size-meta);line-height:1.5;font-weight:var(--weight-body);vertical-align:middle;overflow-wrap:anywhere;text-align:left}.ds-chip svg{flex:none;width:var(--icon-size);height:var(--icon-size)}.ds-chip>span{min-width:0}.ds-missing{border-style:dashed;border-color:var(--error);color:var(--error);background:transparent}.ds-needs-checking{background:var(--warning-soft);color:var(--warning)}.ds-found{background:var(--primary-soft);color:var(--primary)}"
+    },
+    {
+      "name": "Paper card",
+      "kind": "card",
+      "description": "Shared white card for forms, family notes, access controls and supporting panels.",
+      "html": "<section class=\"ds-paper-card\"><h2>For my family</h2><p>Prepared by you. Kept for the people you love.</p></section>",
+      "css": ".ds-paper-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);padding:var(--card-padding);min-width:0;font-family:var(--font-body);font-size:var(--size-body);line-height:var(--line-body);color:var(--text)}.ds-paper-card h2{font-size:var(--size-section);line-height:1.4;margin:0 0 16px;font-weight:var(--weight-strong)}.ds-paper-card p{margin:0 0 20px;overflow-wrap:anywhere}"
+    },
+    {
+      "name": "Policy list card",
+      "kind": "card",
+      "description": "Clickable policy card with a 40px insurance icon circle and status/date beside the summary, stacked on phones.",
+      "html": "<button class=\"ds-policy-row\" type=\"button\"><span class=\"ds-policy-icon\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 13v7a2 2 0 0 0 4 0\"/><path d=\"M12 2v2\"/><path d=\"M20.992 13a1 1 0 0 0 .97-1.274 10.284 10.284 0 0 0-19.923 0A1 1 0 0 0 3 13z\"/></svg></span><span class=\"ds-policy-summary\"><strong>Example Life Insurance</strong><span>Life insurance</span><span class=\"ds-muted\">Policy EXAMPLE-001</span></span><span class=\"ds-row-status\"><span class=\"ds-chip ds-needs-checking\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3\"/><path d=\"M12 9v4\"/><path d=\"M12 17h.01\"/></svg><span>Needs checking</span></span><span class=\"ds-muted\">Last checked 4 Oct</span></span></button>",
+      "css": ".ds-policy-row{display:flex;gap:20px;align-items:flex-start;justify-content:space-between;width:100%;min-height:var(--control-height);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);text-align:left;color:var(--text);padding:24px;font-family:var(--font-body);font-size:var(--size-control);line-height:var(--line-body);cursor:pointer}.ds-policy-row:hover{background:var(--surface-soft)}.ds-policy-row:focus-visible{outline:var(--focus-width) solid var(--focus);outline-offset:var(--focus-offset)}.ds-policy-icon{display:inline-flex;align-items:center;justify-content:center;width:var(--policy-icon-size);height:var(--policy-icon-size);flex:none;background:var(--primary-soft);border-radius:var(--radius-circle);color:var(--text)}.ds-policy-summary{flex:1;min-width:0}.ds-policy-summary>span,.ds-row-status>.ds-muted{display:block;overflow-wrap:anywhere}.ds-policy-row strong{font-size:var(--size-section);display:block;margin-bottom:8px;font-weight:var(--weight-strong)}.ds-muted{color:var(--text-secondary)}.ds-row-status{max-width:280px;min-width:0;font-size:var(--size-meta)}.ds-row-status>.ds-muted{margin-top:8px;font-size:var(--size-meta)}.ds-chip{display:inline-flex;align-items:flex-start;gap:6px;width:fit-content;max-width:100%;padding:5px 8px;border:1px solid transparent;border-radius:var(--radius-chip);font-family:var(--font-body);font-size:var(--size-meta);line-height:1.5;font-weight:var(--weight-body);vertical-align:middle;overflow-wrap:anywhere;text-align:left}.ds-chip svg{flex:none;width:var(--icon-size);height:var(--icon-size)}.ds-chip>span{min-width:0}.ds-missing{border-style:dashed;border-color:var(--error);color:var(--error);background:transparent}.ds-needs-checking{background:var(--warning-soft);color:var(--warning)}.ds-found{background:var(--primary-soft);color:var(--primary)}@media(max-width:600px){.ds-policy-row{flex-wrap:wrap;padding:20px;gap:16px}.ds-policy-summary{flex-basis:calc(100% - 56px)}.ds-row-status{max-width:none;width:100%}}"
+    },
+    {
+      "name": "First-action block",
+      "kind": "custom",
+      "description": "White action card with a square left edge and 4px teal bar, shared with claim guidance.",
+      "html": "<section class=\"ds-first-action\"><p class=\"ds-first-action-label\">Do this first</p><p>Call the insurer to register the claim. Keep the policy number ready.</p><button class=\"ds-primary\" type=\"button\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384\"/></svg>Call insurer</button></section>",
+      "css": ".ds-first-action{padding:20px 24px;background:var(--surface);border:1px solid var(--border);border-left:var(--first-action-bar) solid var(--primary);border-radius:0 var(--radius-card) var(--radius-card) 0;font-family:var(--font-body);color:var(--text);font-size:var(--size-body);line-height:var(--line-body)}.ds-first-action p{margin:0 0 20px;overflow-wrap:anywhere}.ds-first-action .ds-first-action-label{font-size:var(--size-meta);font-weight:var(--weight-strong);color:var(--primary);margin-bottom:8px}.ds-first-action .ds-primary{margin-top:8px}@media(max-width:600px){.ds-first-action{padding:20px 16px}}.ds-primary,.ds-secondary{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:var(--control-height);max-width:100%;padding:12px 24px;border:1px solid transparent;border-radius:var(--radius-control);font-family:var(--font-body);font-size:var(--size-control);font-weight:var(--weight-strong);text-decoration:none;text-align:center;line-height:1.5;cursor:pointer}.ds-primary{background:var(--primary);color:var(--surface)}.ds-primary:hover:not(:disabled){background:var(--primary-hover);color:var(--surface)}.ds-primary:disabled{background:var(--surface-soft);color:var(--text-secondary);border-color:var(--border);cursor:default}.ds-secondary{border-color:var(--border);background:var(--surface);color:var(--text)}.ds-secondary:hover:not(:disabled){background:var(--surface-soft);color:var(--primary)}.ds-secondary:disabled{color:var(--text-secondary);cursor:default}.ds-primary:focus-visible{outline:var(--focus-width) solid var(--focus);outline-offset:var(--focus-offset)}.ds-secondary:focus-visible{outline:var(--focus-width) solid var(--focus);outline-offset:var(--focus-offset)}@media(max-width:600px){.ds-primary,.ds-secondary{width:100%}}"
+    },
+    {
+      "name": "Sample family note",
+      "kind": "card",
+      "description": "Straight, non-interactive hero preview; labelled Sample with fictional policy details and a decorative call button.",
+      "html": "<aside class=\"ds-sample-note\" aria-label=\"Sample of a family policy page\"><span class=\"ds-sample-chip\">Sample</span><header class=\"ds-sample-header\"><p class=\"ds-metadata\">Shared with you</p><h2>Term life · Example Life Insurance</h2><p class=\"ds-metadata\">Last checked 4 Oct</p></header><section class=\"ds-first-action\"><p class=\"ds-first-action-label\">Do this first</p><p>Call the insurer to register the claim. Keep the policy number ready.</p><span class=\"ds-sample-call\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384\"/></svg>Call insurer</span></section><dl class=\"ds-sample-documents\"><div><dt>Death certificate</dt><dd><span class=\"ds-chip ds-missing\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3\"/><path d=\"M12 17h.01\"/></svg><span>Missing</span></span></dd></div><div><dt>Nominee ID</dt><dd><span class=\"ds-chip ds-needs-checking\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3\"/><path d=\"M12 9v4\"/><path d=\"M12 17h.01\"/></svg><span>Needs checking</span></span></dd></div><div><dt>Policy document</dt><dd><span class=\"ds-chip ds-found\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M20 6 9 17l-5-5\"/></svg><span>Found</span></span><span class=\"ds-metadata\">Blue folder</span></dd></div></dl></aside>",
+      "css": ".ds-sample-note{width:100%;max-width:380px;padding:24px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);font-family:var(--font-body);font-size:var(--size-body);line-height:var(--line-body);color:var(--text);min-width:0}.ds-sample-chip{display:inline-block;padding:4px 10px;border-radius:var(--radius-chip);font-size:var(--size-meta);font-weight:var(--weight-strong);background:var(--surface-soft);color:var(--text-secondary)}.ds-sample-header{margin-top:16px}.ds-sample-header h2{font-size:var(--size-section);font-weight:var(--weight-title);line-height:1.4;margin:0 0 8px}.ds-sample-header p{margin:0 0 8px}.ds-metadata{font-size:var(--size-meta);color:var(--text-secondary)}.ds-first-action{padding:20px 24px;background:var(--surface);border:1px solid var(--border);border-left:var(--first-action-bar) solid var(--primary);border-radius:0 var(--radius-card) var(--radius-card) 0;font-family:var(--font-body);color:var(--text);font-size:var(--size-body);line-height:var(--line-body)}.ds-first-action p{margin:0 0 20px;overflow-wrap:anywhere}.ds-first-action .ds-first-action-label{font-size:var(--size-meta);font-weight:var(--weight-strong);color:var(--primary);margin-bottom:8px}.ds-first-action .ds-primary{margin-top:8px}@media(max-width:600px){.ds-first-action{padding:20px 16px}}.ds-sample-note .ds-first-action{margin:20px 0;padding:16px}.ds-sample-note .ds-first-action p:not(.ds-first-action-label){font-size:var(--size-body)}.ds-sample-call{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:var(--control-height);max-width:100%;padding:12px 16px;border:1px solid transparent;border-radius:var(--radius-control);font-size:var(--size-control);font-weight:var(--weight-strong);text-align:center;line-height:1.5;background:var(--primary);color:var(--surface);margin-top:4px}.ds-sample-documents{margin:0}.ds-sample-documents>div{display:grid;gap:8px;grid-template-columns:minmax(0,1fr) auto;align-items:start;border-top:1px solid var(--border);padding:14px 0}.ds-sample-documents>div:last-child{padding-bottom:0}.ds-sample-documents dt{color:var(--text);font-size:var(--size-control);overflow-wrap:anywhere}.ds-sample-documents dd{margin:0;max-width:180px;font-weight:var(--weight-strong);min-width:0}.ds-sample-documents dd>.ds-metadata{display:block;margin-top:6px;font-weight:var(--weight-body)}.ds-chip{display:inline-flex;align-items:flex-start;gap:6px;width:fit-content;max-width:100%;padding:5px 8px;border:1px solid transparent;border-radius:var(--radius-chip);font-family:var(--font-body);font-size:var(--size-meta);line-height:1.5;font-weight:var(--weight-body);vertical-align:middle;overflow-wrap:anywhere;text-align:left}.ds-chip svg{flex:none;width:var(--icon-size);height:var(--icon-size)}.ds-chip>span{min-width:0}.ds-missing{border-style:dashed;border-color:var(--error);color:var(--error);background:transparent}.ds-needs-checking{background:var(--warning-soft);color:var(--warning)}.ds-found{background:var(--primary-soft);color:var(--primary)}@media(max-width:600px){.ds-sample-note{padding:20px}}"
+    }
+  ],
+  "narrative": {
+    "northStar": "Family note",
+    "overview": "Left-aligned text in one column, with short paragraphs and clear section headings.\n\nPages sit on a warm off-white background; content sits on white cards, like a note on paper.",
+    "keyCharacteristics": [
+      "**Family note:** Left-aligned text in one column, with short paragraphs and clear section headings.",
+      "**First-action block:** The first claim action and checked contact appear together above supporting details.",
+      "**Policy fact rows:** Labels sit beside values on larger screens and above them on phones.",
+      "**Visible gaps:** “Missing” or “Needs checking” sits beside the affected detail.",
+      "**Main button:** One filled button per screen state; secondary actions use underlined text.",
+      "**Warm paper:** Pages sit on a warm off-white background; content sits on white cards, like a note on paper.",
+      "**Status shapes:** Every status has a colour AND a shape or icon: dashed outline for Missing, filled amber chip for Needs checking, teal chip with a tick for Found/Checked.",
+      "**Show, don't list:** The landing page shows a sample family note instead of a list of features."
+    ],
+    "rules": [],
+    "dos": [],
+    "donts": []
+  }
+}

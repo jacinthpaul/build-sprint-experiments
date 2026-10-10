@@ -13,8 +13,10 @@ import {SharingChoices} from './sharing-choices';
 import {HomeScreen} from './home-screen';
 import {FamilyDemo} from './family-demo';
 import {InvitationScreen} from './invitation-screen';
+import {applyBrowserTheme} from './theme';
 import '@fontsource/noto-sans/latin-400.css';
 import '@fontsource/noto-sans/latin-700.css';
+import '@fontsource/noto-serif/latin-600.css';
 import './style.css';
 function App(){
  const [route,setRoute]=useState<Route>(readRoute);const {isAuthenticated,isLoading}=useConvexAuth();const {signOut}=useAuthActions();
@@ -55,8 +57,9 @@ function App(){
  else if(route.screen==='guide'&&route.id)content=<FamilyGuide id={route.id as Id<'insurancePolicies'>}/>;
  else if(route.screen==='legacy-family')content=<LegacyFamily token={route.id||''}/>;
  else content=<><h1>That page isn’t available.</h1><button className="primary" onClick={()=>go('start')}>Open Kosh</button></>;
- return <div className={route.screen==='start'?'app-shell home-shell':route.screen==='add'?'app-shell editor-shell':'app-shell'}><header className="app-header"><a className="brand" href="#screen=start" aria-label="Kosh home">Kosh<span className="brand-dot" aria-hidden="true"/></a>{isAuthenticated&&<div className="account-nav"><span className="account-email">{account?.email}</span><button className="text-button" onClick={async()=>{await signOut();setDraft(blankPolicy());savedDraftId.current=null;setNewDraftPrompt(false);go('start');}}>Sign out</button></div>}</header><nav className="app-nav" aria-label="Main navigation"><a href="#screen=start" aria-current={route.screen==='start'?'page':undefined}>Home</a>{isAuthenticated&&<><a href="#screen=policies" aria-current={['policies','policy','share'].includes(route.screen)?'page':undefined}>My policies</a><a href="#screen=family" aria-current={['family','guide','invite'].includes(route.screen)?'page':undefined}>Shared with me</a></>}</nav><main tabIndex={-1} className={route.screen==='start'?'start-page':''}><Notice error={error} status={status}/>{content}</main><footer>Prepared by you. Kept for the people you love.</footer></div>;
+ return <div className={route.screen==='start'?'app-shell home-shell':route.screen==='add'?'app-shell editor-shell':'app-shell'}><header className="app-header"><a className="brand" href="#screen=start" aria-label="Kosh home">Kosh<span className="brand-dot" aria-hidden="true"/></a>{isAuthenticated&&<div className="account-nav"><span className="account-email">{account?.email}</span><button className="text-button" onClick={async()=>{await signOut();setDraft(blankPolicy());savedDraftId.current=null;setNewDraftPrompt(false);go('start');}}>Sign out</button></div>}</header><nav className="app-nav" aria-label="Main navigation"><a href="#screen=start" aria-current={route.screen==='start'?'page':undefined}>Home</a>{isAuthenticated&&<><a href="#screen=policies" aria-current={['policies','policy','share'].includes(route.screen)?'page':undefined}>My policies</a><a href="#screen=family" aria-current={['family','guide','invite'].includes(route.screen)?'page':undefined}>Shared with me</a></>}</nav><main tabIndex={-1} className={route.screen==='start'?'start-page':''}><Notice error={error} status={status}/>{content}</main>{(route.screen!=='start'||newDraftPrompt)&&<footer>Prepared by you. Kept for the people you love.</footer>}</div>;
 }
 class ErrorBoundary extends React.Component<{children:React.ReactNode},{failed:boolean}>{state={failed:false};static getDerivedStateFromError(){return{failed:true};}render(){return this.state.failed?<main><h1>This page couldn’t load.</h1><p>The link may be incomplete, or your connection may be unavailable. Open Kosh to find your saved policies, or try reloading this page.</p><div className="action-row"><button className="primary" onClick={()=>{go('start',undefined,true);this.setState({failed:false});}}>Open Kosh</button><button className="text-button" onClick={()=>location.reload()}>Reload page</button></div></main>:this.props.children;}}
 const client=new ConvexReactClient(import.meta.env.VITE_CONVEX_URL);
+applyBrowserTheme();
 createRoot(document.getElementById('root')!).render(<ConvexAuthProvider client={client}><ErrorBoundary><App/></ErrorBoundary></ConvexAuthProvider>);

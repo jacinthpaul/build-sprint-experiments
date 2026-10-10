@@ -6,8 +6,19 @@
 .invitation-request h3 { margin: 0 0 12px; }
 .request-email { font-weight: 700; overflow-wrap: anywhere; }
 .invitation-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 20px; }
-.create-invitation { margin-top: 28px; }
+.create-invitation { margin-top: 28px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-card); padding: var(--card-padding); }
 .sharing-choices > .link-choice:first-of-type { margin-top: 0; }
 .sharing-choices > .link-choice + .download-choice { margin-top: 24px; }
-.add-family-invitation summary { min-height: 48px; padding: 12px 0; cursor: pointer; text-decoration: underline; text-underline-offset: 4px; }
+.add-family-invitation summary { min-height: var(--control-height); padding: 12px 0; cursor: pointer; text-decoration: underline; text-underline-offset: 4px; }
+/* Keep one filled action when several invitations or requests are shown. */
+.family-invitation ~ .family-invitation > .primary,
+.invitation-request ~ .invitation-request .primary,
+.family-invitation:has(.invitation-request) ~ .family-invitation .invitation-request .primary {
+  color: var(--text); background: var(--surface); border-color: var(--border);
+}
+.family-invitation ~ .family-invitation > .primary:hover:not(:disabled),
+.invitation-request ~ .invitation-request .primary:hover:not(:disabled),
+.family-invitation:has(.invitation-request) ~ .family-invitation .invitation-request .primary:hover:not(:disabled) {
+  color: var(--primary); background: var(--surface-soft);
+}
 @media (max-width: 600px) { .invitation-actions { align-items: stretch; flex-direction: column; gap: 12px; } }
