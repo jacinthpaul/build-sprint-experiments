@@ -38,7 +38,7 @@ function App(){
  function start(){if(hasDraft){setNewDraftPrompt(true);go('start');}else startBlank();}
  async function persist(){setBusy(true);setError('');try{const id=await save(draft);savedDraftId.current=id;setPendingSave(false);setDraft(blankPolicy());go('share',id,true);}catch(e){setPendingSave(false);go('preview',undefined,true);setTimeout(()=>setError(message(e,'Your policy wasn’t saved. Check your connection and try saving again.')),0);}finally{setBusy(false);}}
  function requestSave(){if(isAuthenticated)void persist();else{setPendingSave(true);setTarget({screen:'preview'});handled.current=false;go('access');}}
- function openAccess(destination:Route){setTarget(destination);handled.current=false;go('access');}
+ function openAccess(destination:Route){setPendingSave(false);setTarget(destination);handled.current=false;go('access');}
  useEffect(()=>{if(route.screen==='access'&&isAuthenticated&&!isLoading&&!handled.current){handled.current=true;if(pendingSave)void persist();else go(target.screen,target.id,true);}},[route.screen,isAuthenticated,isLoading,pendingSave]);
  async function recover(){if(!legacy.current)return;setBusy(true);setError('');try{const id=await importLegacy({browserKey:legacy.current});if(id){localStorage.removeItem('family-policy-key');legacy.current=null;go('policy',id);setTimeout(()=>setStatus('Earlier policy recovered. Share it with named recipients; its old public link is now off.'),0);}else setError('No earlier policy is available for this account.');}catch(e){setError(message(e,'Your earlier policy couldn’t be recovered. Try again.'));}finally{setBusy(false);}}
  let content:React.ReactNode;

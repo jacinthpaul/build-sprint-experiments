@@ -4,6 +4,83 @@ import {fillRequiredPolicy} from './policy-input';
 import {captureViewport} from './ux-captures';
 const password='Kosh-demo-password-2026';
 
+test('a failed PDF download explains the problem and preserves the policy',async({page})=>{
+ await page.goto('/#screen=add');
+ await fillRequiredPolicy(page);
+ await page.getByLabel('Policy number',{exact:true}).fill('DEMO-DOWNLOAD-FAILURE');
+ await page.getByRole('button',{name:'Share policy',exact:true}).click();
+ await page.route('**/*pdfmake*.js*',route=>route.abort('failed'));
+ await page.getByRole('button',{name:'Download PDF',exact:true}).click();
+ await expect(page.getByRole('alert')).toContainText('PDF could not be prepared');
+ await expect(page.getByRole('button',{name:'Download PDF',exact:true})).toBeEnabled();
+ await expect(page.getByRole('article',{name:'For my family',exact:true})).toContainText('DEMO-DOWNLOAD-FAILURE');
+ await page.getByRole('button',{name:'Back to details',exact:true}).click();
+ await expect(page.getByLabel('Policy number',{exact:true})).toHaveValue('DEMO-DOWNLOAD-FAILURE');
+});
+
+test('leaving policy signup does not save a draft during a later ordinary sign-in',async({page})=>{
+ test.setTimeout(90000);
+ const email=`kosh-cancel-save-${Date.now()}@example.com`;
+ await page.goto('/#screen=policies');
+ await page.getByRole('button',{name:'New to Kosh? Create account',exact:true}).click();
+ await page.getByLabel('Email address',{exact:true}).fill(email);
+ await page.getByLabel('Password',{exact:true}).fill(password);
+ await page.getByRole('button',{name:'Create account',exact:true}).click();
+ await expect(page.getByText('No saved policies yet. Start with one.',{exact:true})).toBeVisible({timeout:30000});
+ await page.getByRole('button',{name:'Sign out',exact:true}).click();
+ await page.getByRole('button',{name:'Start with one policy',exact:true}).click();
+ await fillRequiredPolicy(page);
+ await page.getByLabel('Policy number',{exact:true}).fill('DEMO-UNSAVED-DRAFT');
+ await page.getByRole('button',{name:'Share policy',exact:true}).click();
+ await page.getByRole('button',{name:'Create private link',exact:true}).click();
+ await expect(page.getByRole('heading',{name:'Create your account',exact:true})).toBeVisible();
+ await page.getByRole('link',{name:'Home',exact:true}).click();
+ await page.getByRole('button',{name:'Open my saved policies',exact:true}).click();
+ await page.getByLabel('Email address',{exact:true}).fill(email);
+ await page.getByLabel('Password',{exact:true}).fill('Wrong-demo-password');
+ await page.getByRole('button',{name:'Sign in',exact:true}).click();
+ await expect(page.getByRole('alert')).toContainText('Check your email and password');
+ await expect(page.getByLabel('Email address',{exact:true})).toHaveValue(email);
+ await page.getByLabel('Password',{exact:true}).fill(password);
+ await page.getByRole('button',{name:'Sign in',exact:true}).click();
+ await expect(page.getByRole('heading',{name:'Your saved policies',exact:true})).toBeVisible({timeout:15000});
+ await expect(page.getByText('No saved policies yet. Start with one.',{exact:true})).toBeVisible();
+ await page.getByRole('link',{name:'Home',exact:true}).click();
+ await page.getByRole('button',{name:'Continue draft',exact:true}).click();
+ await expect(page.getByLabel('Policy number',{exact:true})).toHaveValue('DEMO-UNSAVED-DRAFT');
+});
+
+test('a duplicate save keeps the draft and can be corrected without losing details',async({page})=>{
+ test.setTimeout(90000);
+ await page.goto('/');
+ await page.getByRole('button',{name:'Start with one policy',exact:true}).click();
+ await fillRequiredPolicy(page);
+ await page.getByLabel('Policy number',{exact:true}).fill('DEMO-DUPLICATE');
+ await page.getByRole('button',{name:'Share policy',exact:true}).click();
+ await page.getByRole('button',{name:'Create private link',exact:true}).click();
+ await page.getByLabel('Email address',{exact:true}).fill(`kosh-duplicate-${Date.now()}@example.com`);
+ await page.getByLabel('Password',{exact:true}).fill(password);
+ await page.getByRole('button',{name:'Create account',exact:true}).click();
+ await expect(page.getByRole('button',{name:'Create family invitation',exact:true})).toBeVisible({timeout:30000});
+ await page.getByRole('link',{name:'Home',exact:true}).click();
+ await page.getByRole('button',{name:'Add another policy',exact:true}).click();
+ await fillRequiredPolicy(page);
+ await page.getByLabel('Policy number',{exact:true}).fill('DEMO-DUPLICATE');
+ await page.getByLabel('Where the hard or soft copy is kept',{exact:true}).fill('Keep this draft location');
+ await page.getByRole('button',{name:'Share policy',exact:true}).click();
+ await page.getByRole('button',{name:'Create private link',exact:true}).click();
+ await expect(page.getByRole('alert')).toContainText('already saved');
+ await expect(page.getByRole('article',{name:'For my family',exact:true})).toContainText('Keep this draft location');
+ await page.getByRole('button',{name:'Back to details',exact:true}).click();
+ await expect(page.getByLabel('Policy number',{exact:true})).toHaveValue('DEMO-DUPLICATE');
+ await page.getByLabel('Policy number',{exact:true}).fill('DEMO-CORRECTED');
+ await page.getByRole('button',{name:'Share policy',exact:true}).click();
+ await page.getByRole('button',{name:'Create private link',exact:true}).click();
+ await expect(page.getByRole('button',{name:'Create family invitation',exact:true})).toBeVisible();
+ await page.getByRole('button',{name:'Back to policy',exact:true}).click();
+ await expect(page.getByRole('article',{name:'For my family',exact:true})).toContainText('Keep this draft location');
+});
+
 test('can download before signup, save multiple policies and reopen changes',async({page,browser})=>{
  test.setTimeout(180000);mkdirSync('.impeccable/review',{recursive:true});const email=`kosh-owner-${Date.now()}@example.com`;const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');await page.getByRole('button',{name:'Start with one policy',exact:true}).click();

@@ -1,6 +1,28 @@
 ﻿import {test,expect} from '@playwright/test';
 import {fillRequiredPolicy} from './policy-input';
 const types=['Life insurance','Health insurance','Personal accident insurance','Motor insurance','Home insurance','Travel insurance','Other insurance'];
+test('phone previews preserve long literal text and flag invalid coverage amounts',async({page})=>{
+ await page.setViewportSize({width:320,height:740});await page.goto('/#screen=add');
+ const preview=page.getByRole('article',{name:'Live family note preview',exact:true});
+ await fillRequiredPolicy(page);
+ await page.getByLabel('Policy number',{exact:true}).fill('DEMO-'+'1234567890'.repeat(20));
+ const literal='<script>alert("fictional input")</script>';
+ await page.getByLabel('Where the hard or soft copy is kept',{exact:true}).fill(literal);
+ await page.getByLabel('Coverage amount (₹)',{exact:true}).fill('-1');
+ await page.getByRole('button',{name:'Family preview',exact:true}).click();
+ await expect(preview).toContainText('Needs checking');
+ await expect(preview).toContainText(literal);
+ await expect(preview.locator('script')).toHaveCount(0);
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+ await page.getByRole('button',{name:'Back to policy details',exact:true}).click();
+ await expect(page.getByLabel('Where the hard or soft copy is kept',{exact:true})).toHaveValue(literal);
+ await page.getByLabel('Coverage amount (₹)',{exact:true}).fill('2500000');
+ await page.getByRole('button',{name:'Share policy',exact:true}).click();
+ await expect(page.getByRole('article',{name:'For my family',exact:true})).toContainText('₹25,00,000');
+ await expect(page.getByRole('article',{name:'For my family',exact:true})).toContainText(literal);
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+});
+
 test('all insurance types require insurer and valid contact, while optional details and unfinished drafts stay available',async({page})=>{
  await page.setViewportSize({width:390,height:844});await page.goto('/');
  for(const type of types){

@@ -24,6 +24,6 @@ export function KeepKosh({ onSignIn, card = false }: { onSignIn?: () => void; ca
       {card && !isAuthenticated && <span className="card-description muted">Sign in, then tap to request a payment link. No payment is taken now.</span>}
     </button>
     {!card && !isAuthenticated && <p className="muted">Sign in, then tap to request a payment link. No payment is taken now.</p>}
-    <Notice error={error} status={isAuthenticated && (recorded || mine) ? 'Thank you. Jacinth will send you a payment link on WhatsApp.' : ''}/>
+    <Notice error={error} status={isAuthenticated && (recorded || mine) ? 'Thank you. Your request for a payment link has been saved. No payment has been taken.' : ''}/>
   </div></section>;
 }

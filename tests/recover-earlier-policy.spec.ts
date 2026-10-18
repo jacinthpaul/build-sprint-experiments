@@ -10,7 +10,7 @@ test('recovering an earlier policy preserves details and permanently retires its
   const publicClient = new ConvexHttpClient(url);
   const browserKey = randomBytes(32).toString('hex');
   const token = randomBytes(32).toString('hex');
-  const old = { browserKey, insurer: 'Demo Earlier Insurer', policyNumber: 'DEMO-EARLIER-001', policyType: 'Life insurance' as const, nominee: 'Demo Family', paperLocation: 'Demo folder', firstAction: 'Ask the claims branch.', guideSource: 'Demo policy page 3' };
+  const old = { browserKey, insurer: 'Demo Earlier Insurer', policyNumber: 'DEMO-EARLIER-001', policyType: 'Life insurance' as const, nominee: 'Demo Family', paperLocation: 'Demo folder', firstAction: 'Ask the claims branch.', guideSource: 'Demo policy page 3', personalNote: 'Fictional family note: the spare copy is with Demo Family.' };
   await publicClient.mutation(api.policies.save, old);
   await publicClient.mutation(api.shares.enable, { browserKey, token });
   expect(await publicClient.query(api.shares.get, { token })).toMatchObject({ policyNumber: old.policyNumber });
@@ -26,6 +26,11 @@ test('recovering an earlier policy preserves details and permanently retires its
   await expect(page.getByRole('article')).toContainText('DEMO-EARLIER-001');
   await expect(page.getByRole('article')).toContainText('Demo folder');
   await expect(page.getByRole('article')).toContainText('Ask the claims branch.');
+  await page.getByRole('button',{name:'Share policy',exact:true}).click();
+  const pdf=page.waitForEvent('download');
+  await page.getByRole('button',{name:'Download PDF',exact:true}).click();
+  await (await pdf).saveAs('verification/recovered-policy.pdf');
+  await page.getByRole('button',{name:'Back to policy',exact:true}).click();
   expect(await publicClient.query(api.shares.get, { token })).toBeNull();
   expect(await publicClient.query(api.policies.get, { browserKey })).toBeNull();
   await expect(publicClient.mutation(api.shares.enable, { browserKey, token: randomBytes(32).toString('hex') })).rejects.toThrow(/moved into a Kosh account/);

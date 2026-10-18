@@ -8,6 +8,7 @@
     "build": "tsc --noEmit && vite build",
     "check": "tsc --noEmit",
     "test": "playwright test",
+    "test:pdf": "python tests/verify-downloaded-pdfs.py",
     "deploy": "npx convex dev --once && npx @convex-dev/static-hosting upload --build"
   },
   "keywords": [],

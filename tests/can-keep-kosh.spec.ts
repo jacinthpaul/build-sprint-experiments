@@ -6,7 +6,7 @@ import { api } from '../convex/_generated/api';
 // Reuse one fictional account so repeated verification never inflates the total.
 const email = 'kosh-keep99-proof@example.com';
 const password = 'Kosh-demo-password-2026';
-const thanks = 'Thank you. Jacinth will send you a payment link on WhatsApp.';
+const thanks = 'Thank you. Your request for a payment link has been saved. No payment has been taken.';
 
 test('a signed-in user can tap Keep Kosh twice and is recorded only once', async ({ page }) => {
   test.setTimeout(120000);

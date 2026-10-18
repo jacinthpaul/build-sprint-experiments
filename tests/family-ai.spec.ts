@@ -143,3 +143,36 @@ test('stopping read aloud does not show a playback error', async ({ page }) => {
   await expect(page.getByRole('button', { name: 'Read aloud', exact: true })).toBeVisible();
   await expect(page.getByRole('alert')).toHaveCount(0);
 });
+
+test('the public sample explains fictional data, downloads a sample PDF and makes no AI requests',async({page})=>{
+ const errors:string[]=[],actions:string[]=[];
+ page.on('pageerror',error=>errors.push(error.message));
+ page.on('request',request=>{if(request.url().includes('/api/action'))actions.push(request.url());});
+ await page.goto('/');
+ await page.getByRole('button',{name:'See a sample family page',exact:true}).click();
+ await expect(page.getByRole('heading',{name:'A sample family page',exact:true})).toBeVisible();
+ await expect(page.getByText('All policy details on this page are fictional.',{exact:false})).toBeVisible();
+ await expect(page.getByRole('article',{name:'For my family',exact:true})).toContainText('DEMO-LIFE-001');
+ for(const name of ['Ask Kosh','Speak your question','Check latest claim steps']) {
+  await expect(page.getByRole('button',{name,exact:true})).toBeDisabled();
+ }
+ await page.getByRole('button',{name:'Explore sample claim help',exact:true}).click();
+ await expect(page.getByRole('heading',{name:'Explore example family help',exact:true})).toBeFocused();
+ await page.getByRole('button',{name:'See first-step example',exact:true}).click();
+ await expect(page.locator('.ai-message.assistant')).toContainText('₹25,00,000');
+ await expect(page.getByLabel('Your question',{exact:true})).toBeDisabled();
+ await page.getByRole('button',{name:'See sample escalation (English)',exact:true}).click();
+ await expect(page.locator('.ai-message.assistant')).toContainText('[claim reference]');
+ await expect(page.locator('.ai-message.assistant')).toContainText('No message has been sent.');
+ await page.getByLabel('Example language',{exact:true}).selectOption('Telugu');
+ await page.getByRole('button',{name:'See Telugu example',exact:true}).click();
+ await expect(page.locator('.ai-message.assistant')).toContainText('DEMO-LIFE-001');
+ await expect(page.locator('.ai-message.assistant')).toContainText(/[\u0c00-\u0c7f]/);
+ const download=page.waitForEvent('download');
+ await page.getByRole('button',{name:'Download sample PDF',exact:true}).click();
+ await (await download).saveAs('verification/public-demo.pdf');
+ await page.reload();
+ await expect(page.getByRole('heading',{name:'A sample family page',exact:true})).toBeVisible();
+ await expect(page.locator('.ai-message.assistant')).toHaveCount(0);
+ expect(actions).toEqual([]);expect(errors).toEqual([]);
+});
